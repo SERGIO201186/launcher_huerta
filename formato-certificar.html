@@ -268,6 +268,78 @@ input::placeholder,textarea::placeholder{color:var(--azul-borde);}
 }
 .paso.completo{background:var(--dorado);}
 .paso.activo{background:var(--dorado-suave);}
+
+/* ── FORMATO REGISTRO (selector) ── */
+.reg-mini-item{
+  background:var(--azul-panel);border:1px solid var(--azul-borde);
+  border-radius:10px;padding:12px 14px;margin-bottom:8px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.reg-mini-info .reg-folio{font-size:11px;}
+.reg-mini-info .reg-nombre{font-size:14px;font-weight:600;margin-top:2px;}
+.btn-usar-reg{
+  background:var(--dorado);color:#0f172a;border:none;border-radius:8px;
+  padding:9px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;
+}
+.tarjeta-cargado{
+  background:rgba(59,167,118,0.1);border:1px solid var(--verde);
+  border-radius:10px;padding:14px 16px;margin-bottom:16px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.tarjeta-cargado .tc-nombre{font-weight:700;font-size:14px;color:var(--hueso);}
+.tarjeta-cargado .tc-folio{font-size:11px;color:var(--verde);letter-spacing:0.05em;text-transform:uppercase;margin-top:2px;}
+.btn-cambiar-reg{
+  background:none;border:1px solid var(--azul-borde);color:var(--gris);
+  border-radius:7px;padding:8px 12px;font-size:11px;cursor:pointer;white-space:nowrap;
+}
+.btn-imprimir{
+  width:100%;background:var(--dorado);color:#0f172a;border:none;
+  border-radius:10px;padding:14px;font-size:14px;font-weight:700;
+  cursor:pointer;letter-spacing:0.03em;margin-top:6px;
+}
+.btn-imprimir:disabled{opacity:0.4;cursor:not-allowed;}
+.aviso-formato{
+  font-size:12px;color:var(--gris);line-height:1.6;background:rgba(255,255,255,0.03);
+  border:1px solid var(--azul-borde);border-radius:8px;padding:12px 14px;margin-bottom:16px;
+}
+
+/* ── HOJA IMPRIMIBLE (oculta en pantalla) ── */
+#hoja-imprimible{display:none;}
+
+@media print{
+  body *{visibility:hidden;}
+  #hoja-imprimible, #hoja-imprimible *{visibility:visible;}
+  #hoja-imprimible{display:block;position:absolute;top:0;left:0;width:100%;}
+  .topbar,.tabs,.acciones,.toast{display:none!important;}
+  @page{size:216mm 330mm;margin:8mm;}
+}
+
+.hoja-of{
+  width:200mm;min-height:314mm;background:#fff;color:#000;
+  font-family:Arial,Helvetica,sans-serif;font-size:9.5px;
+  padding:4mm;page-break-after:always;
+}
+.hoja-of:last-child{page-break-after:auto;}
+.of-titulo-doc{text-align:center;font-weight:800;font-size:14px;border:1.5px solid #000;padding:6px;margin-bottom:4px;}
+.of-cabecera{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;gap:8px;}
+.of-cabecera-txt{font-size:9px;line-height:1.4;}
+.of-caja-rc{border:1px solid #000;font-size:9px;padding:4px 6px;min-width:170px;}
+.of-caja-rc div{border-bottom:1px dotted #000;padding:2px 0;}
+.of-caja-rc div:last-child{border-bottom:none;}
+.of-acta-fecha{display:flex;justify-content:space-between;font-size:10px;font-weight:700;margin:4px 0 6px;padding:0 2px;}
+.of-tabla{width:100%;border-collapse:collapse;border:1px solid #000;}
+.of-tabla td{border:1px solid #000;padding:0;vertical-align:top;}
+.of-lado{width:14px;text-align:center;font-weight:700;font-size:8px;writing-mode:vertical-rl;transform:rotate(180deg);background:#eee;}
+.of-bloque{padding:3px 5px;}
+.of-linea{padding:2px 0;display:flex;flex-wrap:wrap;gap:2px 14px;}
+.of-campo-i{display:inline-flex;gap:3px;align-items:baseline;}
+.of-campo-i b{font-weight:400;font-size:8.3px;white-space:nowrap;}
+.of-campo-i span{border-bottom:1px solid #000;min-width:60px;padding:0 3px;font-size:9.3px;font-weight:600;flex:1;}
+.of-sub{font-size:7.6px;color:#333;display:block;text-align:center;}
+.of-titulo-fila{font-weight:800;font-size:9px;background:#ddd;padding:2px 5px;border-bottom:1px solid #000;border-top:1px solid #000;}
+.of-check{white-space:nowrap;}
+.of-tit2{text-align:center;font-weight:800;background:#ccc;border:1px solid #000;padding:4px;margin:5px 0 3px;font-size:11px;}
+.of-nota{border:1px solid #000;padding:6px;font-size:8.6px;margin-top:6px;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -286,6 +358,7 @@ input::placeholder,textarea::placeholder{color:var(--azul-borde);}
 <div class="tabs">
   <button class="tab activo" onclick="cambiarTab('captura',this)">✏️ Capturar</button>
   <button class="tab" onclick="cambiarTab('registros',this)">📂 Registros guardados</button>
+  <button class="tab" onclick="cambiarTab('formato',this)">🖨️ Formato Registro</button>
 </div>
 
 <div class="contenido">
@@ -673,7 +746,115 @@ input::placeholder,textarea::placeholder{color:var(--azul-borde);}
     </div>
   </div>
 
+  <!-- ═══════════════════ SECCIÓN FORMATO REGISTRO ═══════════════════ -->
+  <div class="seccion" id="sec-formato">
+
+    <div class="aviso-formato">
+      Este formato es el documento oficial que se entrega en el Registro Civil. Primero carga un registro capturado en la pestaña <b>Capturar</b>, luego completa los datos exclusivos de este formato (no se piden en la captura) y por último imprime las 2 hojas tamaño oficio.
+    </div>
+
+    <!-- Selector de registro -->
+    <div id="bloque-selector-formato">
+      <div class="grupo">
+        <div class="grupo-titulo">Elegir registro capturado</div>
+        <div id="lista-formato-ui"></div>
+      </div>
+    </div>
+
+    <!-- Tarjeta del registro cargado -->
+    <div id="tarjeta-formato-cargado" style="display:none;">
+      <div class="tarjeta-cargado">
+        <div>
+          <div class="tc-nombre" id="tc-nombre-formato">—</div>
+          <div class="tc-folio" id="tc-folio-formato">—</div>
+        </div>
+        <button class="btn-cambiar-reg" onclick="cambiarRegistroFormato()">↺ Cambiar</button>
+      </div>
+
+      <!-- GRUPO: DATOS EXCLUSIVOS REGISTRO CIVIL -->
+      <div class="grupo">
+        <div class="grupo-titulo">Uso exclusivo Registro Civil</div>
+        <div class="fila2">
+          <div class="campo"><label>Recibo de expediente</label><input type="text" id="rc-recibo" placeholder="Opcional"></div>
+          <div class="campo"><label>Captura de acta</label><input type="text" id="rc-captura" placeholder="Opcional"></div>
+        </div>
+        <div class="fila2">
+          <div class="campo"><label>Boleta / Oficio</label><input type="text" id="rc-boleta" placeholder="Opcional"></div>
+          <div class="campo"><label>No. de Folio (Registro Civil)</label><input type="text" id="rc-folio" placeholder="Opcional"></div>
+        </div>
+        <div class="fila2">
+          <div class="campo"><label>No. de Acta</label><input type="text" id="rc-numacta" placeholder="Opcional"></div>
+          <div class="campo"><label>Fecha del acta</label><input type="date" id="rc-fechaacta"></div>
+        </div>
+      </div>
+
+      <!-- GRUPO: DATOS COMPLEMENTARIOS DEL FINADO (hoja 2) -->
+      <div class="grupo">
+        <div class="grupo-titulo">Datos complementarios del finado</div>
+
+        <div class="campo">
+          <label>1. ¿Tuvo el finado atención médica en su última enfermedad?</label>
+          <select id="cf-atencionmedica">
+            <option value="">— Seleccionar —</option>
+            <option>SI</option>
+            <option>NO</option>
+            <option>NO SE SABE</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label>2. Datos del finado cuando tenga más de 12 años <span style="text-transform:none;font-weight:400">(si es menor, corresponden al padre)</span></label>
+          <select id="cf-actividad" onchange="toggleCfPosicion()">
+            <option value="">— Seleccionar —</option>
+            <option>Tenía trabajo</option>
+            <option>Estudiaba</option>
+            <option>Labores domésticas</option>
+            <option>Incapacitado</option>
+            <option>Jubilado o pensionado</option>
+            <option>Otro</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label>3. Escolaridad</label>
+          <select id="cf-escolaridad" onchange="toggleCfGrado()">
+            <option value="">— Seleccionar —</option>
+            <option>Sin escolaridad</option>
+            <option>Primaria completa</option>
+            <option>Primaria incompleta</option>
+            <option>Secundaria o equivalente</option>
+            <option>Preparatoria o equivalente</option>
+            <option>Profesional</option>
+          </select>
+        </div>
+        <div class="campo" id="campo-cf-grado" style="display:none;">
+          <label>Especificar último grado cursado</label>
+          <input type="text" id="cf-grado" placeholder="Ej. 4to año">
+        </div>
+
+        <div class="campo" id="campo-cf-posicion" style="display:none;">
+          <label>4. Posición en su trabajo</label>
+          <select id="cf-posicion">
+            <option value="">— Seleccionar —</option>
+            <option>Obrero</option>
+            <option>Empleado</option>
+            <option>Jornalero o peón</option>
+            <option>Trabajador por su cuenta</option>
+            <option>Patrón o empresario</option>
+            <option>Trabajador no remunerado</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-imprimir" onclick="imprimirFormato()">🖨️ Imprimir Formato (2 hojas oficio)</button>
+    </div>
+
+  </div>
+
 </div><!-- /contenido -->
+
+<!-- Hoja imprimible (oculta en pantalla, visible sólo al imprimir) -->
+<div id="hoja-imprimible"></div>
 
 <!-- Acciones fijas -->
 <div class="acciones" id="acciones-captura">
@@ -703,14 +884,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const hoy = new Date().toISOString().split('T')[0];
   document.getElementById('fechaFormato').value = hoy;
 
-  // Folio recibido desde el Tablero Logístico (vía URL)
-  const params = new URLSearchParams(window.location.search);
-  const folioURL = params.get('folio');
-  if(folioURL){
-    document.getElementById('folio').value = folioURL;
-    marcarPaso();
-  }
-
   // Construir bloques de personas
   construirPersona('declarante', 'bloque-declarante');
   construirPersona('testigo1', 'bloque-testigo1');
@@ -730,6 +903,7 @@ function cambiarTab(id, btn){
   btn.classList.add('activo');
   document.getElementById('acciones-captura').style.display = id==='captura' ? 'flex' : 'none';
   if(id==='registros') renderRegistros();
+  if(id==='formato') renderListaFormato();
 }
 
 // ═══════════════════════════════════════════
@@ -1163,8 +1337,253 @@ function renderRegistros(){
 }
 
 // ═══════════════════════════════════════════
-//  LIMPIAR / NUEVO
+//  PESTAÑA "FORMATO REGISTRO"
 // ═══════════════════════════════════════════
+let registroFormatoActual = null;
+
+function renderListaFormato(){
+  const lista = document.getElementById('lista-formato-ui');
+  const regs = obtenerRegistros();
+  if(regs.length===0){
+    lista.innerHTML = `<div class="vacio"><div class="vacio-icono">📂</div>No hay registros guardados aún.<br>Captúralos primero en la pestaña Capturar.</div>`;
+  } else {
+    lista.innerHTML = regs.slice().reverse().map(r=>`
+      <div class="reg-mini-item">
+        <div class="reg-mini-info">
+          <div class="reg-folio">Folio: ${r.folio||'—'}</div>
+          <div class="reg-nombre">${r.finado?.nombre||'Sin nombre'}</div>
+        </div>
+        <button class="btn-usar-reg" onclick="seleccionarRegistroFormato(${r.id})">Usar</button>
+      </div>
+    `).join('');
+  }
+  document.getElementById('bloque-selector-formato').style.display = 'block';
+  document.getElementById('tarjeta-formato-cargado').style.display = 'none';
+}
+
+function seleccionarRegistroFormato(id){
+  const r = obtenerRegistros().find(x=>x.id===id);
+  if(!r) return;
+  registroFormatoActual = r;
+  document.getElementById('tc-nombre-formato').textContent = r.finado?.nombre || 'Sin nombre';
+  document.getElementById('tc-folio-formato').textContent = 'Folio: ' + (r.folio||'—');
+
+  // Prellenar datos complementarios con lo ya capturado, si existe
+  const map = { 'SI':'SI','No':'NO','Sí':'SI','No se sabe':'NO SE SABE' };
+  const am = r.finado?.atencionMedica||'';
+  document.getElementById('cf-atencionmedica').value = am==='Sí'?'SI':am==='No'?'NO':am==='No se sabe'?'NO SE SABE':(['SI','NO','NO SE SABE'].includes(am)?am:'');
+  document.getElementById('cf-escolaridad').value = (r.finado?.escolaridad==='Primaria incompleta'||['Sin escolaridad','Primaria completa','Primaria incompleta','Secundaria o equivalente','Preparatoria o equivalente','Profesional'].includes(r.finado?.escolaridad)) ? r.finado.escolaridad : '';
+  toggleCfGrado();
+  toggleCfPosicion();
+
+  document.getElementById('bloque-selector-formato').style.display = 'none';
+  document.getElementById('tarjeta-formato-cargado').style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+function cambiarRegistroFormato(){
+  registroFormatoActual = null;
+  renderListaFormato();
+}
+
+function toggleCfGrado(){
+  document.getElementById('campo-cf-grado').style.display =
+    document.getElementById('cf-escolaridad').value==='Primaria incompleta' ? 'block' : 'none';
+}
+function toggleCfPosicion(){
+  document.getElementById('campo-cf-posicion').style.display =
+    document.getElementById('cf-actividad').value==='Tenía trabajo' ? 'block' : 'none';
+}
+
+// ── Helpers de formato ──
+function ofFecha(iso){
+  if(!iso) return {d:'',m:'',a:''};
+  const [a,m,d] = iso.split('-');
+  return {d:d||'',m:m||'',a:a||''};
+}
+function ofFechaTxt(iso){
+  if(!iso) return '—';
+  const f = ofFecha(iso);
+  return `${f.d}/${f.m}/${f.a}`;
+}
+function ofChk(cond){ return cond ? '(X)' : '( )'; }
+function ofNombrePartes(nombreCompleto){
+  const partes = (nombreCompleto||'').trim().split(/\s+/).filter(Boolean);
+  if(partes.length===0) return {nombres:'',paterno:'',materno:''};
+  if(partes.length===1) return {nombres:partes[0],paterno:'',materno:''};
+  if(partes.length===2) return {nombres:partes[0],paterno:partes[1],materno:''};
+  const materno = partes.pop();
+  const paterno = partes.pop();
+  return {nombres:partes.join(' '),paterno,materno};
+}
+
+// ═══════════════════════════════════════════
+//  CONSTRUIR HOJAS IMPRIMIBLES
+// ═══════════════════════════════════════════
+function construirHojaImprimible(){
+  const r = registroFormatoActual;
+  const nom = ofNombrePartes(r.finado?.nombre);
+  const fNac = ofFecha(r.finado?.fechaNacimiento);
+  const fDef = ofFecha(r.fallecimiento?.fecha);
+  const fActa = ofFecha(document.getElementById('rc-fechaacta').value);
+  const co = r.finado?.conyugue;
+  const pa = r.padre||{};
+  const ma = r.madre||{};
+  const de = r.declarante||{};
+  const t1 = r.testigo1||{};
+  const t2 = r.testigo2||{};
+  const fu = r.funeraria||{};
+
+  const campo = (label,val,minw)=>`<span class="of-campo-i"><b>${label}</b><span style="min-width:${minw||60}px">${val||'&nbsp;'}</span></span>`;
+
+  const HOJA1 = `
+    <div class="hoja-of">
+      <div class="of-cabecera">
+        <div class="of-cabecera-txt">
+          <b>GOBIERNO DEL ESTADO DE VERACRUZ</b><br>SEGOB · REGISTRO CIVIL
+        </div>
+        <div class="of-caja-rc">
+          <div>Recibo Expediente: ${document.getElementById('rc-recibo').value||''}</div>
+          <div>Captura acta: ${document.getElementById('rc-captura').value||''}</div>
+          <div>Boleta/Oficio: ${document.getElementById('rc-boleta').value||''}</div>
+          <div>No. Folio: ${document.getElementById('rc-folio').value||''}</div>
+        </div>
+      </div>
+      <div class="of-titulo-doc">FORMATO DE REGISTRO DE DEFUNCIÓN</div>
+      <div class="of-acta-fecha">
+        <div>No. DE ACTA: ${document.getElementById('rc-numacta').value||'________________'}</div>
+        <div>FECHA: ${fActa.d||'__'} / ${fActa.m||'__'} / ${fActa.a||'____'}</div>
+      </div>
+
+      <table class="of-tabla">
+        <tr>
+          <td class="of-lado">DATOS DEL FINADO</td>
+          <td class="of-bloque">
+            <div class="of-linea">${campo('CURP:',r.finado?.curp,140)}${campo('SEXO:', (r.finado?.sexo==='H'?'(X) H  ( ) M':r.finado?.sexo==='M'?'( ) H  (X) M':'( ) H  ( ) M'),90)}</div>
+            <div class="of-linea">${campo('NOMBRE:',nom.nombres,120)}${campo('AP. PATERNO:',nom.paterno,100)}${campo('AP. MATERNO:',nom.materno,100)}</div>
+            <div class="of-linea">${campo('FECHA NAC.:',`${fNac.d||'__'}/${fNac.m||'__'}/${fNac.a||'____'}`,80)}${campo('EDAD:',r.finado?.edad,30)}${campo('NACIONALIDAD:',r.finado?.nacionalidad,90)}</div>
+            <div class="of-linea">${campo('LUGAR NAC.:',`${r.finado?.nacLocalidad||''} / ${r.finado?.nacMunicipio||''} / ${r.finado?.nacEstado||''} / ${r.finado?.nacPais||''}`,300)}</div>
+            <div class="of-linea">${campo('DOMICILIO:',r.finado?.domicilio,260)}</div>
+            <div class="of-linea">${campo('',`${r.finado?.domLocalidad||''} / ${r.finado?.domMunicipio||''} / ${r.finado?.domEstado||''} / ${r.finado?.domPais||''}`,300)}</div>
+            <div class="of-linea">${campo('ESTADO CIVIL:', (r.finado?.estadoCivil==='Soltero(a)'?'(X) SOLTERO':'( ) SOLTERO')+'&nbsp;&nbsp;'+(r.finado?.estadoCivil==='Casado(a)'?'(X) CASADO':'( ) CASADO')+(r.finado?.estadoCivil&&!['Soltero(a)','Casado(a)'].includes(r.finado.estadoCivil)?'&nbsp;&nbsp;Otro: '+r.finado.estadoCivil:''),260)}</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="of-lado">CÓNYUGE</td>
+          <td class="of-bloque">
+            <div class="of-linea">${campo('NOMBRE:',co?.nombre,200)}${campo('NACIONALIDAD:',r.finado?.nacionalidad,90)}</div>
+            <div class="of-linea">${campo('FECHA NAC.:',co?.fechaNacimiento?ofFechaTxt(co.fechaNacimiento):'',80)}${campo('LUGAR NAC.:',co?`${co.localidad||''} / ${co.municipio||''} / ${co.estado||''}`:'',220)}</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="of-lado">PADRES</td>
+          <td class="of-bloque">
+            <div class="of-linea">${campo('NOMBRE DEL PADRE:',pa.nombre,200)}${campo('SEXO:',pa.sexo==='H'?'H':pa.sexo==='M'?'M':'',30)}${campo('',(pa.estado==='finado'?'(Finado)':'(Vive)'),60)}</div>
+            <div class="of-linea">${campo('FECHA NAC.:',pa.fechaNacimiento?ofFechaTxt(pa.fechaNacimiento):'',80)}${campo('LUGAR NAC.:',pa.estado==='vivo'?`${pa.localidad||''} / ${pa.municipio||''} / ${pa.estado2||''}`:'',220)}</div>
+            <div class="of-linea">${campo('NOMBRE DE LA MADRE:',ma.nombre,200)}${campo('SEXO:',ma.sexo==='M'?'M':ma.sexo==='H'?'H':'',30)}${campo('',(ma.estado==='finado'?'(Finada)':'(Vive)'),60)}</div>
+            <div class="of-linea">${campo('FECHA NAC.:',ma.fechaNacimiento?ofFechaTxt(ma.fechaNacimiento):'',80)}${campo('LUGAR NAC.:',ma.estado==='vivo'?`${ma.localidad||''} / ${ma.municipio||''} / ${ma.estado2||''}`:'',220)}</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="of-lado">DECLARANTE</td>
+          <td class="of-bloque">
+            <div class="of-linea">${campo('NOMBRE DEL DECLARANTE:',de.nombre,220)}${campo('PARENTESCO:',de.parentesco,100)}</div>
+            <div class="of-linea">${campo('ESTADO CIVIL:',de.estadoCivil,100)}${campo('NACIONALIDAD:','Mexicana',80)}${campo('TELÉFONO:',de.telefono,90)}</div>
+            <div class="of-linea">${campo('LUGAR NAC.:',`${de.localidad||''} / ${de.municipio||''} / ${de.estado||''}`,300)}</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="of-lado">FALLECIMIENTO</td>
+          <td class="of-bloque">
+            <div class="of-linea">${campo('FECHA DEFUNCIÓN:',`${fDef.d||'__'}/${fDef.m||'__'}/${fDef.a||'____'}`,80)}${campo('HORA:',r.fallecimiento?.hora,50)}${campo('No. CERTIFICADO:',r.fallecimiento?.numCertificado,90)}</div>
+            <div class="of-linea">${campo('LUGAR FALLECIMIENTO:',`${r.fallecimiento?.lugar||''} ${r.fallecimiento?.nombreLugar?'· '+r.fallecimiento.nombreLugar:''}`,260)}</div>
+            <div class="of-linea of-check">${ofChk(r.fallecimiento?.destino==='Inhumación')} INHUMACIÓN &nbsp; ${ofChk(r.fallecimiento?.destino==='Cremación')} CREMACIÓN &nbsp; ${ofChk(r.fallecimiento?.destino==='Traslado')} TRASLADO</div>
+            <div class="of-linea">${campo('PANTEÓN / DESTINO:',r.fallecimiento?.panteon,260)}</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="of-lado">TESTIGO 1</td>
+          <td class="of-bloque">
+            <div class="of-linea">${campo('NOMBRE:',t1.nombre,220)}${campo('PARENTESCO:',t1.parentesco,100)}</div>
+            <div class="of-linea">${campo('ESTADO CIVIL:',t1.estadoCivil,100)}${campo('NACIONALIDAD:','Mexicana',80)}${campo('TELÉFONO:',t1.telefono,90)}</div>
+            <div class="of-linea">${campo('LUGAR NAC.:',`${t1.localidad||''} / ${t1.municipio||''} / ${t1.estado||''}`,300)}</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="of-lado">TESTIGO 2</td>
+          <td class="of-bloque">
+            <div class="of-linea">${campo('NOMBRE:',t2.nombre,220)}${campo('PARENTESCO:',t2.parentesco,100)}</div>
+            <div class="of-linea">${campo('ESTADO CIVIL:',t2.estadoCivil,100)}${campo('NACIONALIDAD:','Mexicana',80)}${campo('TELÉFONO:',t2.telefono,90)}</div>
+            <div class="of-linea">${campo('LUGAR NAC.:',`${t2.localidad||''} / ${t2.municipio||''} / ${t2.estado||''}`,300)}</div>
+          </td>
+        </tr>
+        <tr>
+          <td class="of-lado">FUNERARIA</td>
+          <td class="of-bloque">
+            <div class="of-linea">${campo('NOMBRE DE LA FUNERARIA:',fu.nombre,220)}${campo('TELÉFONO:',fu.telefono,100)}</div>
+            <div class="of-linea">${campo('CIUDAD:',fu.lugar,150)}${campo('ASESOR/EMPLEADO QUE ASISTE:',fu.asesor,180)}</div>
+            <div style="margin-top:16px;border-top:1px solid #000;width:220px;padding-top:2px;text-align:center;font-size:8px">NOMBRE Y FIRMA DEL DECLARANTE</div>
+          </td>
+        </tr>
+      </table>
+    </div>`;
+
+  const HOJA2 = `
+    <div class="hoja-of">
+      <div class="of-tit2">DATOS COMPLEMENTARIO DEL FINADO</div>
+      <table class="of-tabla">
+        <tr><td class="of-titulo-fila" colspan="1">1.- ¿Tuvo el finado atención médica en su última enfermedad?</td></tr>
+        <tr><td class="of-bloque">
+          ${ofChk(document.getElementById('cf-atencionmedica').value==='SI')} SI &nbsp;&nbsp;
+          ${ofChk(document.getElementById('cf-atencionmedica').value==='NO')} NO &nbsp;&nbsp;
+          ${ofChk(document.getElementById('cf-atencionmedica').value==='NO SE SABE')} NO SE SABE
+        </td></tr>
+        <tr><td class="of-titulo-fila">2.- Datos del finado cuando tenga más de doce años, en caso contrario estos datos corresponden al padre</td></tr>
+        <tr><td class="of-bloque">
+          ${ofChk(document.getElementById('cf-actividad').value==='Tenía trabajo')} a) Tenía trabajo &nbsp;&nbsp;
+          ${ofChk(document.getElementById('cf-actividad').value==='Estudiaba')} b) Estudiaba &nbsp;&nbsp;
+          ${ofChk(document.getElementById('cf-actividad').value==='Labores domésticas')} c) Labores domésticas<br>
+          ${ofChk(document.getElementById('cf-actividad').value==='Incapacitado')} d) Incapacitado &nbsp;&nbsp;
+          ${ofChk(document.getElementById('cf-actividad').value==='Jubilado o pensionado')} e) Jubilado o pensionado &nbsp;&nbsp;
+          ${ofChk(document.getElementById('cf-actividad').value==='Otro')} f) Otro
+        </td></tr>
+        <tr><td class="of-titulo-fila">3. Escolaridad</td></tr>
+        <tr><td class="of-bloque">
+          ${ofChk(document.getElementById('cf-escolaridad').value==='Sin escolaridad')} a) Sin escolaridad &nbsp;&nbsp;
+          ${ofChk(document.getElementById('cf-escolaridad').value==='Secundaria o equivalente')} d) Secundaria o equivalente<br>
+          ${ofChk(document.getElementById('cf-escolaridad').value==='Primaria completa')} b) Primaria completa &nbsp;&nbsp;
+          ${ofChk(document.getElementById('cf-escolaridad').value==='Preparatoria o equivalente')} e) Preparatoria o equivalente<br>
+          ${ofChk(document.getElementById('cf-escolaridad').value==='Primaria incompleta')} c) Primaria incompleta (último grado: ${document.getElementById('cf-grado').value||'____'}) &nbsp;&nbsp;
+          ${ofChk(document.getElementById('cf-escolaridad').value==='Profesional')} f) Profesional
+        </td></tr>
+        <tr><td class="of-titulo-fila">4.- Posición en su trabajo</td></tr>
+        <tr><td class="of-bloque">
+          ${ofChk(document.getElementById('cf-posicion').value==='Obrero')} a) Obrero &nbsp;&nbsp;
+          ${ofChk(document.getElementById('cf-posicion').value==='Jornalero o peón')} c) Jornalero o peón &nbsp;&nbsp;
+          ${ofChk(document.getElementById('cf-posicion').value==='Patrón o empresario')} e) Patrón o empresario<br>
+          ${ofChk(document.getElementById('cf-posicion').value==='Empleado')} b) Empleado &nbsp;&nbsp;
+          ${ofChk(document.getElementById('cf-posicion').value==='Trabajador por su cuenta')} d) Trabajador por su cuenta &nbsp;&nbsp;
+          ${ofChk(document.getElementById('cf-posicion').value==='Trabajador no remunerado')} f) Trabajador no remunerado
+        </td></tr>
+      </table>
+      <div class="of-nota">
+        <b>NOTA</b>: Favor de usar <b>LETRA DE MOLDE</b> para llenar este formato, no se admitirá con rayaduras, tachaduras o enmendaduras. Utilizar tinta negra o azul, <b>NO</b> utilizar lápiz.
+      </div>
+      <div style="font-size:8.5px;margin-top:10px;line-height:1.6">
+        <b>Folio ODS:</b> ${r.folio||'—'} &nbsp;&nbsp; <b>Fecha del formato:</b> ${r.fechaFormato?ofFechaTxt(r.fechaFormato):'—'}
+      </div>
+    </div>`;
+
+  return HOJA1 + HOJA2;
+}
+
+function imprimirFormato(){
+  if(!registroFormatoActual){ mostrarToast('Selecciona un registro primero','error'); return; }
+  document.getElementById('hoja-imprimible').innerHTML = construirHojaImprimible();
+  setTimeout(()=>window.print(), 150);
+}
+
+
 function nuevoRegistro(){
   if(!confirm('¿Limpiar el formulario? Los datos no guardados se perderán.')) return;
   limpiarFormulario();
