@@ -136,7 +136,9 @@ input::placeholder,textarea::placeholder{color:var(--azul-borde);}
 
 .fila2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .fila3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.fila4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;}
 @media(max-width:560px){.fila2,.fila3{grid-template-columns:1fr;}}
+@media(max-width:560px){.fila4{grid-template-columns:1fr 1fr;}}
 
 /* ── CAUSAS DE DEFUNCIÓN ── */
 .causa-item{
@@ -331,7 +333,7 @@ input::placeholder,textarea::placeholder{color:var(--azul-borde);}
         </div>
         <div class="campo">
           <label>Sexo <span class="req">*</span></label>
-          <select id="sexoFinado">
+          <select id="sexoFinado" onchange="toggleConyugue()">
             <option value="">— Seleccionar —</option>
             <option value="H">Hombre</option>
             <option value="M">Mujer</option>
@@ -351,34 +353,6 @@ input::placeholder,textarea::placeholder{color:var(--azul-borde);}
         </select>
       </div>
 
-      <div id="bloque-conyugue" style="display:none; background:rgba(201,162,75,0.05); border:1px solid rgba(201,162,75,0.2); border-radius:10px; padding:14px; margin-bottom:14px;">
-        <div style="font-size:11px;color:var(--dorado-suave);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;">Datos del conyuge</div>
-        <div class="campo">
-          <label>Nombre completo del conyuge <span class="req">*</span></label>
-          <input type="text" id="nombreConyugue" placeholder="Nombre(s) Apellido Paterno Apellido Materno">
-        </div>
-        <div class="campo">
-          <label>Fecha de nacimiento</label>
-          <div class="campo-edad">
-            <div class="campo">
-              <input type="date" id="fechaNacConyugue" oninput="calcularEdad('fechaNacConyugue','edadConyugue','edadConyugueSub')">
-            </div>
-            <div style="text-align:center;">
-              <div class="edad-display" id="edadConyugue">--</div>
-              <div class="edad-sub" id="edadConyugueSub">anos</div>
-            </div>
-          </div>
-        </div>
-        <div class="campo">
-          <label>Lugar de nacimiento</label>
-          <div class="fila3">
-            <input type="text" id="conyugueLocalidad" placeholder="Localidad">
-            <input type="text" id="conyugueMunicipio" placeholder="Municipio">
-            <input type="text" id="conyugueEstado" placeholder="Estado">
-          </div>
-        </div>
-      </div>
-
       <div class="campo">
         <label>Fecha de nacimiento <span class="req">*</span></label>
         <div class="campo-edad">
@@ -394,10 +368,11 @@ input::placeholder,textarea::placeholder{color:var(--azul-borde);}
 
       <div class="campo">
         <label>Lugar de nacimiento</label>
-        <div class="fila3">
+        <div class="fila4">
           <input type="text" id="nacLocalidad" placeholder="Localidad">
           <input type="text" id="nacMunicipio" placeholder="Municipio">
           <input type="text" id="nacEstado" placeholder="Estado">
+          <input type="text" id="nacPais" placeholder="País" value="México">
         </div>
       </div>
 
@@ -464,10 +439,11 @@ input::placeholder,textarea::placeholder{color:var(--azul-borde);}
       <div class="campo">
         <label>Domicilio habitual</label>
         <input type="text" id="domicilioFinado" placeholder="Calle, No. Exterior e Interior y Colonia">
-        <div class="fila3" style="margin-top:8px;">
+        <div class="fila4" style="margin-top:8px;">
           <input type="text" id="domLocalidad" placeholder="Localidad">
           <input type="text" id="domMunicipio" placeholder="Municipio">
           <input type="text" id="domEstado" placeholder="Estado">
+          <input type="text" id="domPais" placeholder="País" value="México">
         </div>
       </div>
     </div>
@@ -543,6 +519,19 @@ input::placeholder,textarea::placeholder{color:var(--azul-borde);}
           <label>Nombre del padre</label>
           <input type="text" id="nombrePadre" placeholder="Nombre completo">
         </div>
+        <div class="fila2">
+          <div class="campo">
+            <label>Fecha de nacimiento</label>
+            <input type="date" id="fechaNacPadre">
+          </div>
+          <div class="campo">
+            <label>Sexo</label>
+            <select id="sexoPadre">
+              <option value="H">Hombre</option>
+              <option value="M">Mujer</option>
+            </select>
+          </div>
+        </div>
         <label style="font-size:11px;color:var(--gris);letter-spacing:0.05em;text-transform:uppercase;display:block;margin-bottom:6px;">Estado</label>
         <div class="padre-vivo-toggle">
           <button class="toggle-btn activo-verde" id="btn-padre-vivo" onclick="setPadreEstado('vivo')">✓ Vive</button>
@@ -565,6 +554,19 @@ input::placeholder,textarea::placeholder{color:var(--azul-borde);}
           <label>Nombre de la madre</label>
           <input type="text" id="nombreMadre" placeholder="Nombre completo">
         </div>
+        <div class="fila2">
+          <div class="campo">
+            <label>Fecha de nacimiento</label>
+            <input type="date" id="fechaNacMadre">
+          </div>
+          <div class="campo">
+            <label>Sexo</label>
+            <select id="sexoMadre">
+              <option value="M">Mujer</option>
+              <option value="H">Hombre</option>
+            </select>
+          </div>
+        </div>
         <label style="font-size:11px;color:var(--gris);letter-spacing:0.05em;text-transform:uppercase;display:block;margin-bottom:6px;">Estado</label>
         <div class="padre-vivo-toggle">
           <button class="toggle-btn activo-verde" id="btn-madre-vivo" onclick="setMadreEstado('vivo')">✓ Vive</button>
@@ -575,6 +577,37 @@ input::placeholder,textarea::placeholder{color:var(--azul-borde);}
             <div class="campo"><label>Localidad</label><input type="text" id="madreLocalidad" placeholder="Localidad"></div>
             <div class="campo"><label>Municipio</label><input type="text" id="madreMunicipio" placeholder="Municipio"></div>
             <div class="campo"><label>Estado</label><input type="text" id="madreEstado" placeholder="Estado"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRUPO 5c: ESPOSO(A) — sólo si el finado está casado(a) -->
+    <div class="grupo" id="grupo-conyugue" style="display:none;">
+      <div class="grupo-titulo" id="tituloConyugue">5c — Datos del esposo(a)</div>
+      <div class="padre-bloque" id="bloque-conyugue">
+        <div class="campo">
+          <label>Nombre completo <span class="req">*</span></label>
+          <input type="text" id="nombreConyugue" placeholder="Nombre(s) Apellido Paterno Apellido Materno">
+        </div>
+        <div class="campo">
+          <label>Fecha de nacimiento</label>
+          <div class="campo-edad">
+            <div class="campo">
+              <input type="date" id="fechaNacConyugue" oninput="calcularEdad('fechaNacConyugue','edadConyugue','edadConyugueSub')">
+            </div>
+            <div style="text-align:center;">
+              <div class="edad-display" id="edadConyugue">—</div>
+              <div class="edad-sub" id="edadConyugueSub">años</div>
+            </div>
+          </div>
+        </div>
+        <div class="campo">
+          <label>Lugar de nacimiento</label>
+          <div class="fila3">
+            <input type="text" id="conyugueLocalidad" placeholder="Localidad">
+            <input type="text" id="conyugueMunicipio" placeholder="Municipio">
+            <input type="text" id="conyugueEstado" placeholder="Estado">
           </div>
         </div>
       </div>
@@ -595,6 +628,38 @@ input::placeholder,textarea::placeholder{color:var(--azul-borde);}
     <div class="grupo">
       <div class="grupo-titulo">8 — Datos del Testigo 2</div>
       <div id="bloque-testigo2"></div>
+    </div>
+
+    <!-- GRUPO 9: DATOS DE LA FUNERARIA -->
+    <div class="grupo">
+      <div class="grupo-titulo">9 — Datos de la funeraria</div>
+      <div class="campo">
+        <label>Nombre de la funeraria</label>
+        <input type="text" id="nombreFuneraria" value="Servicios Funerarios Huerta">
+      </div>
+      <div class="fila2">
+        <div class="campo">
+          <label>Lugar</label>
+          <input type="text" id="lugarFuneraria" value="Xalapa">
+        </div>
+        <div class="campo">
+          <label>Teléfono de contacto</label>
+          <input type="tel" id="telFuneraria" value="2281 84 51 14">
+        </div>
+      </div>
+      <div class="campo">
+        <label>Asesor funerario</label>
+        <select id="asesorFunerario" onchange="toggleAsesorOtro()">
+          <option value="">— Seleccionar —</option>
+          <option>Sergio Cadena</option>
+          <option>Ruth Pozos</option>
+          <option value="Otro">Otro (agregar nombre)</option>
+        </select>
+      </div>
+      <div class="campo" id="campo-asesor-otro" style="display:none;">
+        <label>Nombre del asesor</label>
+        <input type="text" id="asesorOtroNombre" placeholder="Nombre completo de quien realiza el trámite">
+      </div>
     </div>
 
   </div><!-- /sec-captura -->
@@ -627,7 +692,7 @@ let padreEstado = 'vivo';
 let madreEstado = 'vivo';
 let editandoId = null;
 
-const PARENTESCOS = ['Padre','Madre','Hijo','Hija','Abuelo','Abuela','Tío','Tía','Primo','Prima','Sobrino','Sobrina','Nieto','Nieta','Cónyuge','Ninguno'];
+const PARENTESCOS = ['Padre','Madre','Hermano','Hermana','Hijo','Hija','Abuelo','Abuela','Tío','Tía','Primo','Prima','Sobrino','Sobrina','Nieto','Nieta','Cónyuge','Ninguno'];
 const ESTADOS_CIVILES = ['Soltero(a)','Casado(a)','Viudo(a)','Divorciado(a)','Unión libre'];
 
 // ═══════════════════════════════════════════
@@ -660,11 +725,24 @@ function cambiarTab(id, btn){
 }
 
 // ═══════════════════════════════════════════
-//  CONYUGUE
+//  CONYUGUE (ESPOSO/ESPOSA)
 // ═══════════════════════════════════════════
 function toggleConyugue(){
   const val = document.getElementById('estadoCivilFinado').value;
-  document.getElementById('bloque-conyugue').style.display = val === 'Casado(a)' ? 'block' : 'none';
+  const mostrar = val === 'Casado(a)';
+  document.getElementById('grupo-conyugue').style.display = mostrar ? 'block' : 'none';
+
+  const sexo = document.getElementById('sexoFinado').value;
+  const relacion = sexo === 'H' ? 'la esposa' : sexo === 'M' ? 'el esposo' : 'el esposo(a)';
+  document.getElementById('tituloConyugue').textContent = '5c — Datos de ' + relacion;
+}
+
+// ═══════════════════════════════════════════
+//  ASESOR FUNERARIO
+// ═══════════════════════════════════════════
+function toggleAsesorOtro(){
+  const val = document.getElementById('asesorFunerario').value;
+  document.getElementById('campo-asesor-otro').style.display = val === 'Otro' ? 'block' : 'none';
 }
 
 // ═══════════════════════════════════════════
@@ -848,6 +926,7 @@ function recolectarDatos(){
       edad: document.getElementById('edadFinado').textContent,
       conyugue: document.getElementById('estadoCivilFinado').value === 'Casado(a)' ? {
         nombre: g('nombreConyugue'),
+        relacion: g('sexoFinado')==='H' ? 'Esposa' : g('sexoFinado')==='M' ? 'Esposo' : 'Cónyuge',
         fechaNacimiento: g('fechaNacConyugue'),
         localidad: g('conyugueLocalidad'),
         municipio: g('conyugueMunicipio'),
@@ -856,6 +935,7 @@ function recolectarDatos(){
       nacLocalidad: g('nacLocalidad'),
       nacMunicipio: g('nacMunicipio'),
       nacEstado: g('nacEstado'),
+      nacPais: g('nacPais'),
       nacionalidad: g('nacionalidad'),
       escolaridad: g('escolaridad'),
       ocupacion: g('ocupacion'),
@@ -865,6 +945,7 @@ function recolectarDatos(){
       domLocalidad: g('domLocalidad'),
       domMunicipio: g('domMunicipio'),
       domEstado: g('domEstado'),
+      domPais: g('domPais'),
     },
     fallecimiento:{
       fecha: g('fechaDefuncion'),
@@ -878,6 +959,8 @@ function recolectarDatos(){
     causas,
     padre:{
       nombre: g('nombrePadre'),
+      fechaNacimiento: g('fechaNacPadre'),
+      sexo: g('sexoPadre'),
       estado: padreEstado,
       localidad: padreEstado==='vivo'?g('padreLocalidad'):'',
       municipio: padreEstado==='vivo'?g('padreMunicipio'):'',
@@ -885,6 +968,8 @@ function recolectarDatos(){
     },
     madre:{
       nombre: g('nombreMadre'),
+      fechaNacimiento: g('fechaNacMadre'),
+      sexo: g('sexoMadre'),
       estado: madreEstado,
       localidad: madreEstado==='vivo'?g('madreLocalidad'):'',
       municipio: madreEstado==='vivo'?g('madreMunicipio'):'',
@@ -893,6 +978,12 @@ function recolectarDatos(){
     declarante: persona('declarante'),
     testigo1: persona('testigo1'),
     testigo2: persona('testigo2'),
+    funeraria:{
+      nombre: g('nombreFuneraria'),
+      lugar: g('lugarFuneraria'),
+      telefono: g('telFuneraria'),
+      asesor: g('asesorFunerario')==='Otro' ? g('asesorOtroNombre') : g('asesorFunerario'),
+    },
   };
 }
 
@@ -954,10 +1045,12 @@ function cargarRegistro(id){
     set('conyugueEstado',f.conyugue.estado);
   } else { toggleConyugue(); }
   set('nacLocalidad',f.nacLocalidad); set('nacMunicipio',f.nacMunicipio); set('nacEstado',f.nacEstado);
+  set('nacPais',f.nacPais||'México');
   set('nacionalidad',f.nacionalidad); set('escolaridad',f.escolaridad);
   set('ocupacion',f.ocupacion); set('atencionMedica',f.atencionMedica);
   set('domicilioFinado',f.domicilio); set('domLocalidad',f.domLocalidad);
   set('domMunicipio',f.domMunicipio); set('domEstado',f.domEstado);
+  set('domPais',f.domPais||'México');
 
   // Chips salud
   document.querySelectorAll('#chips-salud .chip').forEach(c=>{
@@ -982,6 +1075,8 @@ function cargarRegistro(id){
 
   // Padre
   set('nombrePadre',r.padre?.nombre);
+  set('fechaNacPadre',r.padre?.fechaNacimiento);
+  set('sexoPadre',r.padre?.sexo||'H');
   setPadreEstado(r.padre?.estado||'vivo');
   if(r.padre?.estado==='vivo'){
     set('padreLocalidad',r.padre.localidad); set('padreMunicipio',r.padre.municipio); set('padreEstado',r.padre.estado2);
@@ -989,9 +1084,25 @@ function cargarRegistro(id){
 
   // Madre
   set('nombreMadre',r.madre?.nombre);
+  set('fechaNacMadre',r.madre?.fechaNacimiento);
+  set('sexoMadre',r.madre?.sexo||'M');
   setMadreEstado(r.madre?.estado||'vivo');
   if(r.madre?.estado==='vivo'){
     set('madreLocalidad',r.madre.localidad); set('madreMunicipio',r.madre.municipio); set('madreEstado',r.madre.estado2);
+  }
+
+  // Funeraria
+  const fu = r.funeraria||{};
+  set('nombreFuneraria',fu.nombre||'Servicios Funerarios Huerta');
+  set('lugarFuneraria',fu.lugar||'Xalapa');
+  set('telFuneraria',fu.telefono||'2281 84 51 14');
+  if(fu.asesor==='Sergio Cadena' || fu.asesor==='Ruth Pozos'){
+    set('asesorFunerario',fu.asesor);
+    document.getElementById('campo-asesor-otro').style.display='none';
+  } else if(fu.asesor){
+    set('asesorFunerario','Otro');
+    set('asesorOtroNombre',fu.asesor);
+    document.getElementById('campo-asesor-otro').style.display='block';
   }
 
   // Personas
@@ -1057,12 +1168,26 @@ function limpiarFormulario(){
   });
   document.getElementById('fechaFormato').value=new Date().toISOString().split('T')[0];
   document.getElementById('edadFinado').textContent='—';
+  document.getElementById('edadConyugue').textContent='—';
   document.querySelectorAll('.chip').forEach(c=>c.classList.remove('seleccionado'));
   document.getElementById('lista-causas').innerHTML='';
   causasCount=0;
   agregarCausa();
   setPadreEstado('vivo');
   setMadreEstado('vivo');
+  toggleConyugue();
+  toggleAsesorOtro();
+
+  // Valores por defecto
+  document.getElementById('nacionalidad').value='Mexicana';
+  document.getElementById('nacPais').value='México';
+  document.getElementById('domPais').value='México';
+  document.getElementById('sexoPadre').value='H';
+  document.getElementById('sexoMadre').value='M';
+  document.getElementById('nombreFuneraria').value='Servicios Funerarios Huerta';
+  document.getElementById('lugarFuneraria').value='Xalapa';
+  document.getElementById('telFuneraria').value='2281 84 51 14';
+
   window.scrollTo(0,0);
 }
 
