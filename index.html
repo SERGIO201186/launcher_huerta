@@ -272,35 +272,35 @@
       <h2>Herramientas</h2>
       <div class="grid-apps">
 
-        <a class="icono-app" href="https://sergio201186.github.io/funeraria-huerta/" target="_blank">
+        <div class="icono-app" onclick="ir('https://sergio201186.github.io/funeraria-huerta/')">
           <div class="glifo g1">📋</div>
           <div class="etiqueta">Control Operativo</div>
           <div class="sub">ODS · Tablero · Equipos</div>
-        </a>
+        </div>
 
-        <a class="icono-app" href="https://sergio201186.github.io/Prevision-app/" target="_blank">
+        <div class="icono-app" onclick="ir('https://sergio201186.github.io/Prevision-app/')">
           <div class="glifo g2">📜</div>
           <div class="etiqueta">Previsión Familiar</div>
           <div class="sub">Contratos · Pagos</div>
-        </a>
+        </div>
 
-        <a class="icono-app" href="https://sergio201186.github.io/tienda_huerta/" target="_blank">
+        <div class="icono-app" onclick="ir('https://sergio201186.github.io/tienda_huerta/')">
           <div class="glifo g3">🕊️</div>
           <div class="etiqueta">Tienda Virtual</div>
           <div class="sub">Catálogo · Sitio público</div>
-        </a>
+        </div>
 
-        <a class="icono-app" href="https://sergio201186.github.io/Panel_huerta/" target="_blank">
+        <div class="icono-app" onclick="ir('https://sergio201186.github.io/Panel_huerta/')">
           <div class="glifo g4">📊</div>
           <div class="etiqueta">Panel de Control</div>
           <div class="sub">Vista general</div>
-        </a>
+        </div>
 
-        <a class="icono-app" href="https://script.google.com/macros/s/AKfycbwO0hojzqOh4bDGHGh823Js37gIHYDODuX2gQ1M10VHhgVl5ndPDOvdH-wBUXMcWLAp/exec" target="_blank">
+        <div class="icono-app" onclick="ir('https://script.google.com/macros/s/AKfycbwO0hojzqOh4bDGHGh823Js37gIHYDODuX2gQ1M10VHhgVl5ndPDOvdH-wBUXMcWLAp/exec')">
           <div class="glifo g6">☁️</div>
           <div class="etiqueta">Sincronización Nube</div>
           <div class="sub">Apps Script</div>
-        </a>
+        </div>
 
         <div class="icono-app proximamente">
           <div class="glifo g5">🗂️</div>
@@ -321,13 +321,16 @@
         <div class="stat ok"><div class="num" id="statCobrar">—</div><div class="lbl">Por cobrar</div></div>
       </div>
 
-      <div class="logistica-wrap" style="margin-top:12px;">
-        <iframe
-          id="iframeLogistica"
-          src="https://sergio201186.github.io/funeraria-huerta/"
-          loading="lazy"
-          allow="clipboard-read; clipboard-write">
-        </iframe>
+      <div class="logistica-wrap" style="margin-top:12px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px; cursor:pointer;" onclick="ir('https://sergio201186.github.io/funeraria-huerta/')">
+        <div style="font-size:36px;">📋</div>
+        <div style="font-family:'Helvetica Neue',Arial,sans-serif; font-size:13px; color:var(--gris-texto); text-align:center; line-height:1.6;">
+          Toca aquí para abrir el<br>
+          <span style="color:var(--dorado-suave); font-weight:600;">Tablero Logístico en vivo</span><br>
+          <span style="font-size:11px;">ODS activas · Equipos · Cobros pendientes</span>
+        </div>
+        <div style="background:var(--dorado); color:#0f172a; font-family:'Helvetica Neue',Arial,sans-serif; font-size:12px; font-weight:700; padding:8px 22px; border-radius:8px; letter-spacing:0.05em;">
+          ABRIR CONTROL OPERATIVO
+        </div>
       </div>
     </section>
 
@@ -341,6 +344,10 @@
 </div>
 
 <script>
+  function ir(url){
+    window.location.href = url;
+  }
+
   function actualizarReloj(){
     const ahora = new Date();
     const horas = String(ahora.getHours()).padStart(2,'0');
