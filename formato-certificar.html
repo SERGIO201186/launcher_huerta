@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f172a">
+<title>Formato para Certificar — Funeraria Huerta</title>
+<style>
+:root{
+  --azul:#0f172a;
+  --azul-panel:#16213a;
+  --azul-borde:#27324d;
+  --azul-input:#1e2d45;
+  --dorado:#c9a24b;
+  --dorado-suave:#e3c878;
+  --hueso:#f4f1ea;
+  --gris:#9aa5b8;
+  --verde:#3ba776;
+  --rojo:#d8553f;
+  --amarillo:#e8b84b;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+html{font-size:15px;}
+body{
+  background:var(--azul);
+  color:var(--hueso);
+  font-family:'Helvetica Neue',Arial,sans-serif;
+  min-height:100vh;
+  padding-bottom:100px;
+}
+
+/* ── HEADER ── */
+.topbar{
+  background:var(--azul-panel);
+  border-bottom:1px solid var(--azul-borde);
+  padding:14px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+.topbar-marca{display:flex;align-items:center;gap:10px;}
+.topbar-sello{
+  width:36px;height:36px;border-radius:50%;
+  border:1.5px solid var(--dorado);
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;color:var(--dorado-suave);
+  font-family:'Times New Roman',serif;flex-shrink:0;
+}
+.topbar h1{font-size:15px;font-weight:600;letter-spacing:0.03em;color:var(--hueso);}
+.topbar p{font-size:11px;color:var(--dorado-suave);letter-spacing:0.08em;text-transform:uppercase;}
+.btn-regresar{
+  background:none;border:1px solid var(--azul-borde);
+  color:var(--gris);padding:7px 14px;border-radius:8px;
+  font-size:12px;cursor:pointer;letter-spacing:0.04em;
+}
+.btn-regresar:active{background:rgba(255,255,255,0.05);}
+
+/* ── TABS ── */
+.tabs{
+  display:flex;overflow-x:auto;
+  background:var(--azul-panel);
+  border-bottom:1px solid var(--azul-borde);
+  padding:0 16px;gap:2px;
+  scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{
+  padding:11px 16px;font-size:12px;letter-spacing:0.05em;
+  text-transform:uppercase;color:var(--gris);
+  border:none;background:none;cursor:pointer;
+  border-bottom:2px solid transparent;
+  white-space:nowrap;transition:color .15s,border-color .15s;
+}
+.tab.activo{color:var(--dorado-suave);border-bottom-color:var(--dorado);}
+
+/* ── CONTENIDO ── */
+.contenido{padding:20px 16px;max-width:800px;margin:0 auto;}
+.seccion{display:none;}
+.seccion.visible{display:block;}
+
+/* ── GRUPOS DE CAMPOS ── */
+.grupo{
+  background:var(--azul-panel);
+  border:1px solid var(--azul-borde);
+  border-radius:12px;
+  padding:18px;
+  margin-bottom:16px;
+}
+.grupo-titulo{
+  font-size:11px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--dorado-suave);margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.grupo-titulo::before{
+  content:"";width:4px;height:4px;border-radius:50%;
+  background:var(--dorado);flex-shrink:0;
+}
+
+.campo{margin-bottom:14px;}
+.campo:last-child{margin-bottom:0;}
+.campo label{
+  display:block;font-size:11.5px;color:var(--gris);
+  letter-spacing:0.05em;text-transform:uppercase;
+  margin-bottom:5px;
+}
+.campo label span.req{color:var(--dorado);margin-left:2px;}
+
+input[type=text],input[type=date],input[type=time],input[type=number],
+input[type=tel],select,textarea{
+  width:100%;background:var(--azul-input);
+  border:1px solid var(--azul-borde);border-radius:8px;
+  color:var(--hueso);font-size:14px;padding:10px 12px;
+  outline:none;transition:border-color .15s;
+  -webkit-appearance:none;appearance:none;
+  font-family:'Helvetica Neue',Arial,sans-serif;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--dorado);}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239aa5b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+textarea{resize:vertical;min-height:72px;}
+input::placeholder,textarea::placeholder{color:var(--azul-borde);}
+
+.campo-edad{
+  display:flex;gap:10px;align-items:flex-end;
+}
+.campo-edad .campo{flex:1;margin-bottom:0;}
+.edad-display{
+  background:var(--azul-input);border:1px solid var(--azul-borde);
+  border-radius:8px;padding:10px 12px;min-width:80px;
+  text-align:center;font-size:16px;font-weight:700;
+  color:var(--dorado-suave);letter-spacing:0.02em;
+}
+.edad-sub{font-size:9px;color:var(--gris);text-transform:uppercase;letter-spacing:0.06em;margin-top:3px;}
+
+.fila2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fila3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media(max-width:560px){.fila2,.fila3{grid-template-columns:1fr;}}
+
+/* ── CAUSAS DE DEFUNCIÓN ── */
+.causa-item{
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--azul-borde);
+  border-radius:9px;padding:14px;margin-bottom:10px;
+  position:relative;
+}
+.causa-num{
+  font-size:10px;color:var(--dorado-suave);letter-spacing:0.08em;
+  text-transform:uppercase;margin-bottom:10px;font-weight:600;
+}
+.causa-fila{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:end;}
+.causa-fila .campo{margin-bottom:0;}
+.intervalo-num{width:80px;}
+.intervalo-unidad{width:110px;}
+.btn-quitar-causa{
+  background:rgba(216,85,63,0.15);border:1px solid rgba(216,85,63,0.3);
+  color:var(--rojo);border-radius:7px;padding:10px 10px;
+  font-size:13px;cursor:pointer;height:40px;display:flex;
+  align-items:center;justify-content:center;
+}
+.btn-agregar-causa{
+  display:flex;align-items:center;gap:8px;
+  background:none;border:1px dashed var(--azul-borde);
+  color:var(--gris);border-radius:8px;padding:10px 14px;
+  font-size:12px;cursor:pointer;width:100%;justify-content:center;
+  letter-spacing:0.04em;margin-top:4px;
+}
+.btn-agregar-causa:active{background:rgba(255,255,255,0.03);}
+
+/* ── PERSONA (declarante / testigo) ── */
+.persona-bloque{
+  border:1px solid var(--azul-borde);border-radius:10px;
+  padding:14px;margin-bottom:12px;
+  background:rgba(255,255,255,0.02);
+}
+.persona-titulo{
+  font-size:12px;font-weight:600;color:var(--dorado-suave);
+  margin-bottom:12px;letter-spacing:0.04em;
+}
+
+/* ── PADRES ── */
+.padre-bloque{margin-bottom:14px;}
+.padre-vivo-toggle{
+  display:flex;gap:10px;margin-bottom:10px;
+}
+.toggle-btn{
+  flex:1;padding:9px;border-radius:8px;border:1px solid var(--azul-borde);
+  background:none;color:var(--gris);font-size:12px;cursor:pointer;
+  letter-spacing:0.03em;transition:all .15s;
+}
+.toggle-btn.activo-verde{background:rgba(59,167,118,0.15);border-color:var(--verde);color:var(--verde);}
+.toggle-btn.activo-rojo{background:rgba(216,85,63,0.15);border-color:var(--rojo);color:var(--rojo);}
+
+/* ── CHIP DE AFILIACIÓN ── */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+.chip{
+  padding:7px 14px;border-radius:20px;
+  border:1px solid var(--azul-borde);background:none;
+  color:var(--gris);font-size:12px;cursor:pointer;
+  transition:all .15s;letter-spacing:0.03em;
+}
+.chip.seleccionado{background:rgba(201,162,75,0.15);border-color:var(--dorado);color:var(--dorado-suave);}
+
+/* ── FOOTER ACCIONES ── */
+.acciones{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--azul-panel);border-top:1px solid var(--azul-borde);
+  padding:12px 16px;display:flex;gap:10px;z-index:100;
+}
+.btn-guardar{
+  flex:1;background:var(--dorado);color:#0f172a;
+  border:none;border-radius:10px;padding:13px;
+  font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.04em;
+}
+.btn-guardar:active{opacity:0.85;}
+.btn-nuevo{
+  background:none;border:1px solid var(--azul-borde);
+  color:var(--gris);border-radius:10px;padding:13px 18px;
+  font-size:13px;cursor:pointer;
+}
+
+/* ── LISTA DE REGISTROS ── */
+.lista-registros{margin-top:8px;}
+.reg-item{
+  background:var(--azul-panel);border:1px solid var(--azul-borde);
+  border-radius:10px;padding:14px 16px;margin-bottom:10px;
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;transition:border-color .15s;
+}
+.reg-item:active{border-color:var(--dorado);}
+.reg-info{flex:1;}
+.reg-folio{font-size:12px;color:var(--dorado-suave);letter-spacing:0.06em;text-transform:uppercase;}
+.reg-nombre{font-size:15px;font-weight:600;margin-top:2px;}
+.reg-fecha{font-size:11px;color:var(--gris);margin-top:3px;}
+.reg-flecha{color:var(--gris);font-size:18px;margin-left:10px;}
+.reg-acciones{display:flex;gap:8px;margin-left:10px;}
+.btn-reg{
+  padding:6px 10px;border-radius:7px;border:1px solid var(--azul-borde);
+  background:none;color:var(--gris);font-size:11px;cursor:pointer;
+}
+.btn-reg.eliminar{border-color:rgba(216,85,63,0.3);color:var(--rojo);}
+
+.vacio{text-align:center;padding:40px 20px;color:var(--gris);font-size:13px;line-height:1.7;}
+.vacio-icono{font-size:36px;margin-bottom:10px;opacity:0.5;}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;top:70px;left:50%;transform:translateX(-50%);
+  background:var(--verde);color:#fff;padding:10px 20px;
+  border-radius:20px;font-size:13px;font-weight:600;
+  z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;
+  white-space:nowrap;
+}
+.toast.show{opacity:1;}
+.toast.error{background:var(--rojo);}
+
+/* ── NAV PASOS ── */
+.nav-pasos{
+  display:flex;justify-content:space-between;
+  margin-bottom:18px;gap:6px;
+}
+.paso{
+  flex:1;height:4px;border-radius:2px;
+  background:var(--azul-borde);transition:background .3s;
+}
+.paso.completo{background:var(--dorado);}
+.paso.activo{background:var(--dorado-suave);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-marca">
+    <div class="topbar-sello">H</div>
+    <div>
+      <h1>Formato para Certificar</h1>
+      <p>Registro de Defunción · Funeraria Huerta</p>
+    </div>
+  </div>
+  <button class="btn-regresar" onclick="window.location.href='index.html'">← Inicio</button>
+</div>
+
+<div class="tabs">
+  <button class="tab activo" onclick="cambiarTab('captura',this)">✏️ Capturar</button>
+  <button class="tab" onclick="cambiarTab('registros',this)">📂 Registros guardados</button>
+</div>
+
+<div class="contenido">
+
+  <!-- ═══════════════════ SECCIÓN CAPTURA ═══════════════════ -->
+  <div class="seccion visible" id="sec-captura">
+
+    <div class="nav-pasos">
+      <div class="paso activo" id="p1"></div>
+      <div class="paso" id="p2"></div>
+      <div class="paso" id="p3"></div>
+      <div class="paso" id="p4"></div>
+      <div class="paso" id="p5"></div>
+    </div>
+
+    <!-- GRUPO 1: IDENTIFICACIÓN DEL SERVICIO -->
+    <div class="grupo">
+      <div class="grupo-titulo">1 — Identificación del servicio</div>
+
+      <div class="fila2">
+        <div class="campo">
+          <label>No. de Folio ODS <span class="req">*</span></label>
+          <input type="text" id="folio" placeholder="Ej. ODS-2026-001" oninput="marcarPaso()">
+        </div>
+        <div class="campo">
+          <label>Fecha del formato <span class="req">*</span></label>
+          <input type="date" id="fechaFormato" oninput="marcarPaso()">
+        </div>
+      </div>
+    </div>
+
+    <!-- GRUPO 2: DATOS DEL FINADO -->
+    <div class="grupo">
+      <div class="grupo-titulo">2 — Datos del finado</div>
+
+      <div class="campo">
+        <label>Nombre completo <span class="req">*</span></label>
+        <input type="text" id="nombreFinado" placeholder="Nombre(s) Apellido Paterno Apellido Materno" oninput="marcarPaso()">
+      </div>
+
+      <div class="fila2">
+        <div class="campo">
+          <label>CURP</label>
+          <input type="text" id="curpFinado" placeholder="Opcional" style="text-transform:uppercase">
+        </div>
+        <div class="campo">
+          <label>Sexo <span class="req">*</span></label>
+          <select id="sexoFinado">
+            <option value="">— Seleccionar —</option>
+            <option value="H">Hombre</option>
+            <option value="M">Mujer</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Estado civil <span class="req">*</span></label>
+        <select id="estadoCivilFinado">
+          <option value="">— Seleccionar —</option>
+          <option>Soltero(a)</option>
+          <option>Casado(a)</option>
+          <option>Viudo(a)</option>
+          <option>Divorciado(a)</option>
+          <option>Unión libre</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Fecha de nacimiento <span class="req">*</span></label>
+        <div class="campo-edad">
+          <div class="campo">
+            <input type="date" id="fechaNacFinado" oninput="calcularEdad('fechaNacFinado','edadFinado','edadFinadoSub')">
+          </div>
+          <div style="text-align:center;">
+            <div class="edad-display" id="edadFinado">—</div>
+            <div class="edad-sub" id="edadFinadoSub">años</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Lugar de nacimiento</label>
+        <div class="fila3">
+          <input type="text" id="nacLocalidad" placeholder="Localidad">
+          <input type="text" id="nacMunicipio" placeholder="Municipio">
+          <input type="text" id="nacEstado" placeholder="Estado">
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Nacionalidad</label>
+        <input type="text" id="nacionalidad" placeholder="Mexicana" value="Mexicana">
+      </div>
+
+      <div class="campo">
+        <label>Grado de estudios</label>
+        <select id="escolaridad">
+          <option value="">— Seleccionar —</option>
+          <option>Sin escolaridad</option>
+          <option>Primaria incompleta</option>
+          <option>Primaria completa</option>
+          <option>Secundaria o equivalente</option>
+          <option>Preparatoria o equivalente</option>
+          <option>Profesional</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Ocupación habitual</label>
+        <select id="ocupacion">
+          <option value="">— Seleccionar —</option>
+          <option>Obrero</option>
+          <option>Empleado</option>
+          <option>Jornalero o peón</option>
+          <option>Trabajador por su cuenta</option>
+          <option>Patrón o empresario</option>
+          <option>Trabajador no remunerado</option>
+          <option>Labores domésticas</option>
+          <option>Estudiante</option>
+          <option>Jubilado o pensionado</option>
+          <option>Incapacitado</option>
+          <option>Otro</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>¿Tuvo atención médica en su última enfermedad?</label>
+        <select id="atencionMedica">
+          <option value="">— Seleccionar —</option>
+          <option>Sí</option>
+          <option>No</option>
+          <option>No se sabe</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Afiliación a salud</label>
+        <div class="chips" id="chips-salud">
+          <button class="chip" onclick="toggleChip(this,'salud')">IMSS</button>
+          <button class="chip" onclick="toggleChip(this,'salud')">ISSSTE</button>
+          <button class="chip" onclick="toggleChip(this,'salud')">SEDENA</button>
+          <button class="chip" onclick="toggleChip(this,'salud')">SEMAR</button>
+          <button class="chip" onclick="toggleChip(this,'salud')">PEMEX</button>
+          <button class="chip" onclick="toggleChip(this,'salud')">Seguro Popular</button>
+          <button class="chip" onclick="toggleChip(this,'salud')">BIENESTAR</button>
+          <button class="chip" onclick="toggleChip(this,'salud')">Ninguna</button>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Domicilio habitual</label>
+        <input type="text" id="domicilioFinado" placeholder="Calle, No. Exterior e Interior y Colonia">
+        <div class="fila3" style="margin-top:8px;">
+          <input type="text" id="domLocalidad" placeholder="Localidad">
+          <input type="text" id="domMunicipio" placeholder="Municipio">
+          <input type="text" id="domEstado" placeholder="Estado">
+        </div>
+      </div>
+    </div>
+
+    <!-- GRUPO 3: DATOS DEL FALLECIMIENTO -->
+    <div class="grupo">
+      <div class="grupo-titulo">3 — Datos del fallecimiento</div>
+
+      <div class="fila2">
+        <div class="campo">
+          <label>Fecha de defunción <span class="req">*</span></label>
+          <input type="date" id="fechaDefuncion">
+        </div>
+        <div class="campo">
+          <label>Hora de defunción <span class="req">*</span></label>
+          <input type="time" id="horaDefuncion">
+        </div>
+      </div>
+
+      <div class="campo">
+        <label>Lugar donde ocurrió la defunción</label>
+        <select id="lugarDefuncion">
+          <option value="">— Seleccionar —</option>
+          <option>Hogar</option>
+          <option>Hospital o clínica</option>
+          <option>Vía pública</option>
+          <option>Otro lugar</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Nombre del lugar / Hospital</label>
+        <input type="text" id="nombreLugarDef" placeholder="Si aplica">
+      </div>
+
+      <div class="campo">
+        <label>No. de Certificado de Defunción</label>
+        <input type="text" id="numCertificado" placeholder="Número del certificado médico">
+      </div>
+
+      <div class="campo">
+        <label>Destino del cadáver</label>
+        <select id="destinoCadaver">
+          <option value="">— Seleccionar —</option>
+          <option>Inhumación</option>
+          <option>Cremación</option>
+          <option>Traslado</option>
+        </select>
+      </div>
+
+      <div class="campo" id="campo-panteon">
+        <label>Nombre del panteón / Lugar</label>
+        <input type="text" id="nombrePanteon" placeholder="Panteón, ubicación">
+      </div>
+    </div>
+
+    <!-- GRUPO 4: CAUSAS DE DEFUNCIÓN -->
+    <div class="grupo">
+      <div class="grupo-titulo">4 — Causas de defunción <span style="font-weight:400;color:var(--gris)">(mín. 1 · máx. 5)</span></div>
+
+      <div id="lista-causas"></div>
+
+      <button class="btn-agregar-causa" id="btn-add-causa" onclick="agregarCausa()">
+        + Agregar causa
+      </button>
+    </div>
+
+    <!-- GRUPO 5: DATOS DE LOS PADRES -->
+    <div class="grupo">
+      <div class="grupo-titulo">5 — Datos del padre</div>
+      <div class="padre-bloque" id="bloque-padre">
+        <div class="campo">
+          <label>Nombre del padre</label>
+          <input type="text" id="nombrePadre" placeholder="Nombre completo">
+        </div>
+        <label style="font-size:11px;color:var(--gris);letter-spacing:0.05em;text-transform:uppercase;display:block;margin-bottom:6px;">Estado</label>
+        <div class="padre-vivo-toggle">
+          <button class="toggle-btn activo-verde" id="btn-padre-vivo" onclick="setPadreEstado('vivo')">✓ Vive</button>
+          <button class="toggle-btn" id="btn-padre-finado" onclick="setPadreEstado('finado')">✗ Finado</button>
+        </div>
+        <div id="padre-nacimiento">
+          <div class="fila3">
+            <div class="campo"><label>Localidad</label><input type="text" id="padreLocalidad" placeholder="Localidad"></div>
+            <div class="campo"><label>Municipio</label><input type="text" id="padreMunicipio" placeholder="Municipio"></div>
+            <div class="campo"><label>Estado</label><input type="text" id="padreEstado" placeholder="Estado"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grupo">
+      <div class="grupo-titulo">5b — Datos de la madre</div>
+      <div class="padre-bloque" id="bloque-madre">
+        <div class="campo">
+          <label>Nombre de la madre</label>
+          <input type="text" id="nombreMadre" placeholder="Nombre completo">
+        </div>
+        <label style="font-size:11px;color:var(--gris);letter-spacing:0.05em;text-transform:uppercase;display:block;margin-bottom:6px;">Estado</label>
+        <div class="padre-vivo-toggle">
+          <button class="toggle-btn activo-verde" id="btn-madre-vivo" onclick="setMadreEstado('vivo')">✓ Vive</button>
+          <button class="toggle-btn" id="btn-madre-finado" onclick="setMadreEstado('finado')">✗ Finada</button>
+        </div>
+        <div id="madre-nacimiento">
+          <div class="fila3">
+            <div class="campo"><label>Localidad</label><input type="text" id="madreLocalidad" placeholder="Localidad"></div>
+            <div class="campo"><label>Municipio</label><input type="text" id="madreMunicipio" placeholder="Municipio"></div>
+            <div class="campo"><label>Estado</label><input type="text" id="madreEstado" placeholder="Estado"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRUPO 6: DECLARANTE -->
+    <div class="grupo">
+      <div class="grupo-titulo">6 — Datos del declarante</div>
+      <div id="bloque-declarante"></div>
+    </div>
+
+    <!-- GRUPO 7: TESTIGOS -->
+    <div class="grupo">
+      <div class="grupo-titulo">7 — Datos del Testigo 1</div>
+      <div id="bloque-testigo1"></div>
+    </div>
+
+    <div class="grupo">
+      <div class="grupo-titulo">8 — Datos del Testigo 2</div>
+      <div id="bloque-testigo2"></div>
+    </div>
+
+  </div><!-- /sec-captura -->
+
+
+  <!-- ═══════════════════ SECCIÓN REGISTROS ═══════════════════ -->
+  <div class="seccion" id="sec-registros">
+    <div class="grupo">
+      <div class="grupo-titulo">Registros guardados</div>
+      <div id="lista-registros-ui"></div>
+    </div>
+  </div>
+
+</div><!-- /contenido -->
+
+<!-- Acciones fijas -->
+<div class="acciones" id="acciones-captura">
+  <button class="btn-nuevo" onclick="nuevoRegistro()">🗑 Limpiar</button>
+  <button class="btn-guardar" onclick="guardarRegistro()">💾 Guardar registro</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  ESTADO GLOBAL
+// ═══════════════════════════════════════════
+let causasCount = 0;
+let padreEstado = 'vivo';
+let madreEstado = 'vivo';
+let editandoId = null;
+
+const PARENTESCOS = ['Padre','Madre','Hijo','Hija','Abuelo','Abuela','Tío','Tía','Primo','Prima','Sobrino','Sobrina','Nieto','Nieta','Cónyuge','Ninguno'];
+const ESTADOS_CIVILES = ['Soltero(a)','Casado(a)','Viudo(a)','Divorciado(a)','Unión libre'];
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', ()=>{
+  // Fecha de hoy por defecto
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById('fechaFormato').value = hoy;
+
+  // Construir bloques de personas
+  construirPersona('declarante', 'bloque-declarante');
+  construirPersona('testigo1', 'bloque-testigo1');
+  construirPersona('testigo2', 'bloque-testigo2');
+
+  // Primera causa
+  agregarCausa();
+});
+
+// ═══════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════
+function cambiarTab(id, btn){
+  document.querySelectorAll('.seccion').forEach(s=>s.classList.remove('visible'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('activo'));
+  document.getElementById('sec-'+id).classList.add('visible');
+  btn.classList.add('activo');
+  document.getElementById('acciones-captura').style.display = id==='captura' ? 'flex' : 'none';
+  if(id==='registros') renderRegistros();
+}
+
+// ═══════════════════════════════════════════
+//  EDAD AUTOMÁTICA
+// ═══════════════════════════════════════════
+function calcularEdad(inputId, displayId, subId){
+  const val = document.getElementById(inputId).value;
+  if(!val){ document.getElementById(displayId).textContent='—'; return; }
+  const nac = new Date(val);
+  const hoy = new Date();
+  let edad = hoy.getFullYear() - nac.getFullYear();
+  const m = hoy.getMonth() - nac.getMonth();
+  if(m<0 || (m===0 && hoy.getDate()<nac.getDate())) edad--;
+  document.getElementById(displayId).textContent = edad>=0 ? edad : '—';
+}
+
+// ═══════════════════════════════════════════
+//  CHIPS
+// ═══════════════════════════════════════════
+function toggleChip(btn, grupo){
+  if(grupo==='salud'){
+    // Ninguna deselecciona las demás
+    if(btn.textContent==='Ninguna'){
+      document.querySelectorAll('#chips-salud .chip').forEach(c=>{
+        c.classList.remove('seleccionado');
+      });
+    } else {
+      document.querySelector('#chips-salud .chip:last-child')?.classList.remove('seleccionado');
+    }
+  }
+  btn.classList.toggle('seleccionado');
+}
+
+// ═══════════════════════════════════════════
+//  CAUSAS DE DEFUNCIÓN
+// ═══════════════════════════════════════════
+function agregarCausa(){
+  if(causasCount >= 5){ mostrarToast('Máximo 5 causas','error'); return; }
+  causasCount++;
+  const num = causasCount;
+  const div = document.createElement('div');
+  div.className = 'causa-item';
+  div.id = 'causa-'+num;
+  div.innerHTML = `
+    <div class="causa-num">Causa ${num}</div>
+    <div class="campo">
+      <label>Descripción de la causa</label>
+      <input type="text" placeholder="Ej. Paro cardiorrespiratorio" id="causa-desc-${num}">
+    </div>
+    <div class="causa-fila">
+      <div class="campo">
+        <label>Intervalo de tiempo</label>
+        <input type="number" min="0" placeholder="Cantidad" id="causa-int-${num}" class="intervalo-num">
+      </div>
+      <div class="campo">
+        <label>Unidad</label>
+        <select id="causa-uni-${num}" class="intervalo-unidad">
+          <option value="">Unidad</option>
+          <option>Minutos</option>
+          <option>Horas</option>
+          <option>Días</option>
+          <option>Semanas</option>
+          <option>Meses</option>
+          <option>Años</option>
+        </select>
+      </div>
+      ${num>1?`<button class="btn-quitar-causa" onclick="quitarCausa(${num})">✕</button>`:'<div></div>'}
+    </div>
+  `;
+  document.getElementById('lista-causas').appendChild(div);
+  document.getElementById('btn-add-causa').style.display = causasCount>=5?'none':'flex';
+}
+
+function quitarCausa(n){
+  document.getElementById('causa-'+n)?.remove();
+  causasCount--;
+  document.getElementById('btn-add-causa').style.display='flex';
+  // Renumerar visualmente
+  document.querySelectorAll('.causa-item').forEach((el,i)=>{
+    el.querySelector('.causa-num').textContent = 'Causa '+(i+1);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  PADRES
+// ═══════════════════════════════════════════
+function setPadreEstado(est){
+  padreEstado = est;
+  document.getElementById('btn-padre-vivo').className = 'toggle-btn'+(est==='vivo'?' activo-verde':'');
+  document.getElementById('btn-padre-finado').className = 'toggle-btn'+(est==='finado'?' activo-rojo':'');
+  document.getElementById('padre-nacimiento').style.display = est==='vivo'?'block':'none';
+}
+function setMadreEstado(est){
+  madreEstado = est;
+  document.getElementById('btn-madre-vivo').className = 'toggle-btn'+(est==='vivo'?' activo-verde':'');
+  document.getElementById('btn-madre-finado').className = 'toggle-btn'+(est==='finado'?' activo-rojo':'');
+  document.getElementById('madre-nacimiento').style.display = est==='vivo'?'block':'none';
+}
+
+// ═══════════════════════════════════════════
+//  PERSONAS (declarante / testigos)
+// ═══════════════════════════════════════════
+function construirPersona(prefijo, contenedorId){
+  const c = document.getElementById(contenedorId);
+  c.innerHTML = `
+    <div class="persona-bloque">
+      <div class="campo">
+        <label>Nombre completo <span class="req">*</span></label>
+        <input type="text" id="${prefijo}-nombre" placeholder="Nombre completo">
+      </div>
+      <div class="fila2">
+        <div class="campo">
+          <label>Parentesco con el finado</label>
+          <select id="${prefijo}-parentesco">
+            <option value="">— Seleccionar —</option>
+            ${PARENTESCOS.map(p=>`<option>${p}</option>`).join('')}
+          </select>
+        </div>
+        <div class="campo">
+          <label>Estado civil</label>
+          <select id="${prefijo}-estadocivil">
+            <option value="">— Seleccionar —</option>
+            ${ESTADOS_CIVILES.map(e=>`<option>${e}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Lugar de nacimiento</label>
+        <div class="fila3">
+          <input type="text" id="${prefijo}-localidad" placeholder="Localidad">
+          <input type="text" id="${prefijo}-municipio" placeholder="Municipio">
+          <input type="text" id="${prefijo}-estado" placeholder="Estado">
+        </div>
+      </div>
+      <div class="campo">
+        <label>Teléfono</label>
+        <input type="tel" id="${prefijo}-telefono" placeholder="10 dígitos">
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════
+//  RECOLECTAR DATOS DEL FORMULARIO
+// ═══════════════════════════════════════════
+function recolectarDatos(){
+  const g = id => document.getElementById(id)?.value || '';
+  const chips = () => Array.from(document.querySelectorAll('#chips-salud .chip.seleccionado')).map(c=>c.textContent);
+  
+  const causas = [];
+  document.querySelectorAll('.causa-item').forEach((el,i)=>{
+    const n = i+1;
+    causas.push({
+      descripcion: document.getElementById('causa-desc-'+n)?.value||'',
+      intervalo: document.getElementById('causa-int-'+n)?.value||'',
+      unidad: document.getElementById('causa-uni-'+n)?.value||''
+    });
+  });
+
+  const persona = (p) => ({
+    nombre: g(p+'-nombre'),
+    parentesco: g(p+'-parentesco'),
+    estadoCivil: g(p+'-estadocivil'),
+    localidad: g(p+'-localidad'),
+    municipio: g(p+'-municipio'),
+    estado: g(p+'-estado'),
+    telefono: g(p+'-telefono')
+  });
+
+  return {
+    id: editandoId || Date.now(),
+    fechaGuardado: new Date().toISOString(),
+    folio: g('folio'),
+    fechaFormato: g('fechaFormato'),
+    finado:{
+      nombre: g('nombreFinado'),
+      curp: g('curpFinado'),
+      sexo: g('sexoFinado'),
+      estadoCivil: g('estadoCivilFinado'),
+      fechaNacimiento: g('fechaNacFinado'),
+      edad: document.getElementById('edadFinado').textContent,
+      nacLocalidad: g('nacLocalidad'),
+      nacMunicipio: g('nacMunicipio'),
+      nacEstado: g('nacEstado'),
+      nacionalidad: g('nacionalidad'),
+      escolaridad: g('escolaridad'),
+      ocupacion: g('ocupacion'),
+      atencionMedica: g('atencionMedica'),
+      saludAfiliacion: chips(),
+      domicilio: g('domicilioFinado'),
+      domLocalidad: g('domLocalidad'),
+      domMunicipio: g('domMunicipio'),
+      domEstado: g('domEstado'),
+    },
+    fallecimiento:{
+      fecha: g('fechaDefuncion'),
+      hora: g('horaDefuncion'),
+      lugar: g('lugarDefuncion'),
+      nombreLugar: g('nombreLugarDef'),
+      numCertificado: g('numCertificado'),
+      destino: g('destinoCadaver'),
+      panteon: g('nombrePanteon'),
+    },
+    causas,
+    padre:{
+      nombre: g('nombrePadre'),
+      estado: padreEstado,
+      localidad: padreEstado==='vivo'?g('padreLocalidad'):'',
+      municipio: padreEstado==='vivo'?g('padreMunicipio'):'',
+      estado2: padreEstado==='vivo'?g('padreEstado'):'',
+    },
+    madre:{
+      nombre: g('nombreMadre'),
+      estado: madreEstado,
+      localidad: madreEstado==='vivo'?g('madreLocalidad'):'',
+      municipio: madreEstado==='vivo'?g('madreMunicipio'):'',
+      estado2: madreEstado==='vivo'?g('madreEstado'):'',
+    },
+    declarante: persona('declarante'),
+    testigo1: persona('testigo1'),
+    testigo2: persona('testigo2'),
+  };
+}
+
+// ═══════════════════════════════════════════
+//  GUARDAR
+// ═══════════════════════════════════════════
+function guardarRegistro(){
+  const folio = document.getElementById('folio').value.trim();
+  const nombre = document.getElementById('nombreFinado').value.trim();
+  if(!folio){ mostrarToast('Ingresa el No. de Folio ODS','error'); return; }
+  if(!nombre){ mostrarToast('Ingresa el nombre del finado','error'); return; }
+
+  const datos = recolectarDatos();
+  let registros = obtenerRegistros();
+
+  if(editandoId){
+    const idx = registros.findIndex(r=>r.id===editandoId);
+    if(idx>=0) registros[idx]=datos;
+    else registros.push(datos);
+    editandoId=null;
+  } else {
+    registros.push(datos);
+  }
+
+  localStorage.setItem('defunciones_huerta', JSON.stringify(registros));
+  mostrarToast('✓ Registro guardado correctamente');
+  setTimeout(()=>{ limpiarFormulario(); }, 1200);
+}
+
+// ═══════════════════════════════════════════
+//  OBTENER / CARGAR / ELIMINAR
+// ═══════════════════════════════════════════
+function obtenerRegistros(){
+  try{ return JSON.parse(localStorage.getItem('defunciones_huerta')||'[]'); }
+  catch(e){ return []; }
+}
+
+function cargarRegistro(id){
+  const r = obtenerRegistros().find(x=>x.id===id);
+  if(!r) return;
+  editandoId = id;
+
+  const s = id => { const el=document.getElementById(id); if(el) el.value=''; };
+  const set = (id,val) => { const el=document.getElementById(id); if(el) el.value=val||''; };
+
+  set('folio',r.folio); set('fechaFormato',r.fechaFormato);
+  const f=r.finado||{};
+  set('nombreFinado',f.nombre); set('curpFinado',f.curp); set('sexoFinado',f.sexo);
+  set('estadoCivilFinado',f.estadoCivil); set('fechaNacFinado',f.fechaNacimiento);
+  calcularEdad('fechaNacFinado','edadFinado','edadFinadoSub');
+  set('nacLocalidad',f.nacLocalidad); set('nacMunicipio',f.nacMunicipio); set('nacEstado',f.nacEstado);
+  set('nacionalidad',f.nacionalidad); set('escolaridad',f.escolaridad);
+  set('ocupacion',f.ocupacion); set('atencionMedica',f.atencionMedica);
+  set('domicilioFinado',f.domicilio); set('domLocalidad',f.domLocalidad);
+  set('domMunicipio',f.domMunicipio); set('domEstado',f.domEstado);
+
+  // Chips salud
+  document.querySelectorAll('#chips-salud .chip').forEach(c=>{
+    c.classList.toggle('seleccionado', (f.saludAfiliacion||[]).includes(c.textContent));
+  });
+
+  const d=r.fallecimiento||{};
+  set('fechaDefuncion',d.fecha); set('horaDefuncion',d.hora);
+  set('lugarDefuncion',d.lugar); set('nombreLugarDef',d.nombreLugar);
+  set('numCertificado',d.numCertificado); set('destinoCadaver',d.destino);
+  set('nombrePanteon',d.panteon);
+
+  // Causas
+  document.getElementById('lista-causas').innerHTML='';
+  causasCount=0;
+  (r.causas||[]).forEach(c=>{
+    agregarCausa();
+    set('causa-desc-'+causasCount,c.descripcion);
+    set('causa-int-'+causasCount,c.intervalo);
+    set('causa-uni-'+causasCount,c.unidad);
+  });
+
+  // Padre
+  set('nombrePadre',r.padre?.nombre);
+  setPadreEstado(r.padre?.estado||'vivo');
+  if(r.padre?.estado==='vivo'){
+    set('padreLocalidad',r.padre.localidad); set('padreMunicipio',r.padre.municipio); set('padreEstado',r.padre.estado2);
+  }
+
+  // Madre
+  set('nombreMadre',r.madre?.nombre);
+  setMadreEstado(r.madre?.estado||'vivo');
+  if(r.madre?.estado==='vivo'){
+    set('madreLocalidad',r.madre.localidad); set('madreMunicipio',r.madre.municipio); set('madreEstado',r.madre.estado2);
+  }
+
+  // Personas
+  const cargarPersona = (pref, obj) => {
+    set(pref+'-nombre',obj?.nombre); set(pref+'-parentesco',obj?.parentesco);
+    set(pref+'-estadocivil',obj?.estadoCivil); set(pref+'-localidad',obj?.localidad);
+    set(pref+'-municipio',obj?.municipio); set(pref+'-estado',obj?.estado);
+    set(pref+'-telefono',obj?.telefono);
+  };
+  cargarPersona('declarante',r.declarante);
+  cargarPersona('testigo1',r.testigo1);
+  cargarPersona('testigo2',r.testigo2);
+
+  // Ir a captura
+  document.querySelectorAll('.tab')[0].click();
+  mostrarToast('Registro cargado para editar');
+}
+
+function eliminarRegistro(id){
+  if(!confirm('¿Eliminar este registro? Esta acción no se puede deshacer.')) return;
+  let registros = obtenerRegistros().filter(r=>r.id!==id);
+  localStorage.setItem('defunciones_huerta', JSON.stringify(registros));
+  renderRegistros();
+  mostrarToast('Registro eliminado');
+}
+
+// ═══════════════════════════════════════════
+//  RENDERIZAR LISTA
+// ═══════════════════════════════════════════
+function renderRegistros(){
+  const lista = document.getElementById('lista-registros-ui');
+  const regs = obtenerRegistros();
+  if(regs.length===0){
+    lista.innerHTML=`<div class="vacio"><div class="vacio-icono">📂</div>No hay registros guardados aún.<br>Captura el primer servicio.</div>`;
+    return;
+  }
+  lista.innerHTML = regs.slice().reverse().map(r=>`
+    <div class="reg-item" onclick="cargarRegistro(${r.id})">
+      <div class="reg-info">
+        <div class="reg-folio">Folio: ${r.folio||'—'}</div>
+        <div class="reg-nombre">${r.finado?.nombre||'Sin nombre'}</div>
+        <div class="reg-fecha">Defunción: ${r.fallecimiento?.fecha||'—'} &nbsp;·&nbsp; Guardado: ${new Date(r.fechaGuardado).toLocaleDateString('es-MX')}</div>
+      </div>
+      <div class="reg-acciones">
+        <button class="btn-reg eliminar" onclick="event.stopPropagation();eliminarRegistro(${r.id})">🗑</button>
+        <div class="reg-flecha">›</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════
+//  LIMPIAR / NUEVO
+// ═══════════════════════════════════════════
+function nuevoRegistro(){
+  if(!confirm('¿Limpiar el formulario? Los datos no guardados se perderán.')) return;
+  limpiarFormulario();
+}
+function limpiarFormulario(){
+  editandoId=null;
+  document.querySelectorAll('input,select,textarea').forEach(el=>{
+    if(el.type!=='button') el.value='';
+  });
+  document.getElementById('fechaFormato').value=new Date().toISOString().split('T')[0];
+  document.getElementById('edadFinado').textContent='—';
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('seleccionado'));
+  document.getElementById('lista-causas').innerHTML='';
+  causasCount=0;
+  agregarCausa();
+  setPadreEstado('vivo');
+  setMadreEstado('vivo');
+  window.scrollTo(0,0);
+}
+
+// ═══════════════════════════════════════════
+//  PASOS VISUALES
+// ═══════════════════════════════════════════
+function marcarPaso(){
+  const folio=document.getElementById('folio').value;
+  const nombre=document.getElementById('nombreFinado').value;
+  if(folio) document.getElementById('p1').className='paso completo';
+  if(nombre) document.getElementById('p2').className='paso completo';
+}
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+function mostrarToast(msg, tipo='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast show'+(tipo==='error'?' error':'');
+  setTimeout(()=>t.className='toast',2800);
+}
+</script>
+</body>
+</html>
