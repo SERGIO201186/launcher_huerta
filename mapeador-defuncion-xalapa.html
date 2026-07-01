@@ -125,10 +125,45 @@ body{background:#4a4a4a;font-family:Arial,sans-serif;}
   cursor:pointer;margin-bottom:8px;
 }
 
+/* ── BARRA DE HERRAMIENTAS (agregar campos) ── */
+.barra-herramientas{
+  position:fixed;bottom:52px;left:0;right:0;
+  background:#0f172a;border-top:1px solid #27324d;
+  padding:8px 16px;display:none;gap:8px;flex-wrap:wrap;
+  z-index:300;
+}
+.barra-herramientas.visible{display:flex;}
+.btn-mini{
+  padding:8px 12px;border-radius:7px;border:1px solid #27324d;
+  background:rgba(255,255,255,0.06);color:#e3c878;
+  font-size:11.5px;cursor:pointer;font-weight:600;white-space:nowrap;
+}
+.btn-mini.activo{background:#c9a24b;color:#0f172a;}
+
+/* ── FICHA / PANEL DE EDICIÓN DE UN CAMPO SELECCIONADO ── */
+.editor-campo{
+  position:fixed;bottom:96px;left:0;right:0;
+  background:#16213a;border-top:2px solid #c9a24b;
+  padding:12px 16px;display:none;flex-direction:column;gap:10px;
+  z-index:310;max-height:60vh;overflow-y:auto;
+}
+.editor-campo.visible{display:flex;}
+.editor-campo-titulo{font-size:11px;color:#9aa5b8;letter-spacing:0.06em;text-transform:uppercase;}
+#editor-texto{
+  width:100%;padding:11px;border-radius:8px;border:1px solid #27324d;
+  background:#1e2d45;color:#f4f1ea;font-size:15px;
+}
+.editor-fila{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.editor-fila .btn-mini{flex:none;}
+.editor-cerrar-x{
+  position:absolute;top:8px;right:12px;background:none;border:none;
+  color:#9aa5b8;font-size:18px;cursor:pointer;
+}
+
 /* ── IMPRIMIR ── */
 @media print{
   body{background:white;}
-  .toolbar,.modal-overlay,.pagina-label,.panel-edicion{display:none!important;}
+  .toolbar,.modal-overlay,.pagina-label,.panel-edicion,.barra-herramientas,.editor-campo{display:none!important;}
   .paginas{padding:0;gap:0;}
   .pagina{
     max-width:100%;
@@ -178,10 +213,40 @@ body{background:#4a4a4a;font-family:Arial,sans-serif;}
 
 <!-- ── PANEL DE MODO EDICIÓN ── -->
 <div class="panel-edicion" id="panel-edicion">
-  <span>Modo edición activo — arrastra los campos para reposicionarlos · doble clic para editar el texto</span>
-  <div style="display:flex;gap:8px;">
+  <span>Modo edición activo — arrastra los campos · doble clic para editar</span>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
     <button class="btn btn-dorado" onclick="copiarCoordenadas()">📋 Copiar coordenadas</button>
     <button class="btn btn-rojo" onclick="salirEdicion()">🔓 Salir</button>
+  </div>
+</div>
+
+<!-- ── BARRA: AGREGAR CAMPOS NUEVOS ── -->
+<div class="barra-herramientas" id="barra-herramientas">
+  <button class="btn-mini" onclick="agregarCampoTexto()">➕ Campo de texto</button>
+  <button class="btn-mini" onclick="agregarCampoCheckbox()">➕ Checkbox</button>
+  <button class="btn-mini" onclick="agregarCampoMultiple()">➕ Opción múltiple</button>
+</div>
+
+<!-- ── FICHA DE EDICIÓN DE UN CAMPO SELECCIONADO ── -->
+<div class="editor-campo" id="editor-campo">
+  <button class="editor-cerrar-x" onclick="cerrarEditorCampo()">✕</button>
+  <div class="editor-campo-titulo" id="editor-campo-id">Editando campo</div>
+  <input type="text" id="editor-texto" placeholder="Contenido del campo" oninput="onEditarTextoInput()">
+  <div class="editor-fila">
+    <button class="btn-mini" id="btn-tipo-texto" onclick="cambiarTipoCampo('texto')">🔤 Tipo: Texto</button>
+    <button class="btn-mini" id="btn-tipo-checkbox" onclick="cambiarTipoCampo('checkbox')">☑️ Tipo: Checkbox</button>
+    <button class="btn-mini" id="btn-marcar" onclick="toggleMarcaCampo()" style="display:none;">Marcar / Desmarcar</button>
+  </div>
+  <div class="editor-fila">
+    <span style="font-size:11px;color:#9aa5b8;">Ancho:</span>
+    <button class="btn-mini" onclick="cambiarAncho(-2)">−</button>
+    <button class="btn-mini" onclick="cambiarAncho(2)">+</button>
+    <span style="font-size:11px;color:#9aa5b8;margin-left:8px;">Letra:</span>
+    <button class="btn-mini" onclick="cambiarFuente(-1)">−</button>
+    <button class="btn-mini" onclick="cambiarFuente(1)">+</button>
+  </div>
+  <div class="editor-fila">
+    <button class="btn btn-rojo" onclick="eliminarCampoActivo()" style="flex:1;">🗑 Eliminar este campo</button>
   </div>
 </div>
 
@@ -359,6 +424,15 @@ body{background:#4a4a4a;font-family:Arial,sans-serif;}
       <span class="f" style="top:91.5%;left:9%;width:25%">Xalapa, Ver.</span>
       <span class="f" id="f-funerario"   style="top:93%;left:9%;width:70%"></span>
 
+    </div>
+  </div>
+
+  <!-- PÁGINA 2 — Datos complementarios -->
+  <div>
+    <div class="pagina-label">Página 2 — Datos complementarios del finado</div>
+    <div class="pagina" id="pagina2">
+      <img class="fondo" src="formato_p2.png" alt="Datos complementarios del finado">
+      <!-- Sin campos todavía: agrégalos tú con las herramientas de abajo en modo edición -->
     </div>
   </div>
 
@@ -620,18 +694,25 @@ function activarEdicion(){
   modoEdicion = true;
   document.body.classList.add('modo-edicion');
   document.getElementById('panel-edicion').style.display = 'flex';
+  document.getElementById('barra-herramientas').classList.add('visible');
   document.getElementById('btn-editar').textContent = '🔓 Editando…';
-  document.querySelectorAll('.f').forEach(el=>{
-    el.addEventListener('mousedown', iniciarArrastre);
-    el.addEventListener('touchstart', iniciarArrastre, {passive:false});
-    el.addEventListener('dblclick', editarTexto);
-  });
+  document.querySelectorAll('.f').forEach(bindEventosCampo);
 }
 function salirEdicion(){
   modoEdicion = false;
   document.body.classList.remove('modo-edicion');
   document.getElementById('panel-edicion').style.display = 'none';
+  document.getElementById('barra-herramientas').classList.remove('visible');
   document.getElementById('btn-editar').textContent = '🔒 Editar';
+  cerrarEditorCampo();
+}
+
+function bindEventosCampo(el){
+  if(el.dataset.bound === '1') return;
+  el.dataset.bound = '1';
+  el.addEventListener('mousedown', iniciarArrastre);
+  el.addEventListener('touchstart', iniciarArrastre, {passive:false});
+  el.addEventListener('dblclick', editarTexto);
 }
 
 function iniciarArrastre(e){
@@ -657,22 +738,251 @@ function moverArrastre(e){
   elemActivo.style.top  = topPct.toFixed(2) + '%';
 }
 function terminarArrastre(){
+  persistirSiEsCustom(elemActivo);
   elemActivo = null;
   document.removeEventListener('mousemove', moverArrastre);
   document.removeEventListener('touchmove', moverArrastre);
 }
 function editarTexto(e){
   if(!modoEdicion) return;
-  const el = e.currentTarget;
-  const nuevo = prompt('Editar texto del campo "'+el.id+'":', el.textContent);
-  if(nuevo !== null) el.textContent = nuevo;
+  abrirEditorCampo(e.currentTarget);
+}
+
+// ══════════════════════════════════════════
+//  FICHA DE EDICIÓN DE CAMPO (panel inferior)
+// ══════════════════════════════════════════
+let campoActivo = null;
+
+function abrirEditorCampo(el){
+  campoActivo = el;
+  document.getElementById('editor-campo-id').textContent =
+    'Editando: ' + (el.dataset.custom === '1' ? (el.dataset.label || el.id) : el.id);
+  document.getElementById('editor-texto').value = el.textContent;
+  const tipo = el.dataset.tipo || 'texto';
+  document.getElementById('btn-tipo-texto').classList.toggle('activo', tipo === 'texto');
+  document.getElementById('btn-tipo-checkbox').classList.toggle('activo', tipo === 'checkbox');
+  document.getElementById('btn-marcar').style.display = tipo === 'checkbox' ? 'inline-block' : 'none';
+  document.getElementById('editor-campo').classList.add('visible');
+}
+function cerrarEditorCampo(){
+  document.getElementById('editor-campo').classList.remove('visible');
+  campoActivo = null;
+}
+function onEditarTextoInput(){
+  if(!campoActivo) return;
+  campoActivo.textContent = document.getElementById('editor-texto').value;
+  persistirCampoActivo();
+}
+function cambiarTipoCampo(tipo){
+  if(!campoActivo) return;
+  campoActivo.dataset.tipo = tipo;
+  document.getElementById('btn-tipo-texto').classList.toggle('activo', tipo === 'texto');
+  document.getElementById('btn-tipo-checkbox').classList.toggle('activo', tipo === 'checkbox');
+  document.getElementById('btn-marcar').style.display = tipo === 'checkbox' ? 'inline-block' : 'none';
+  if(tipo === 'checkbox' && !['( )','(X)'].includes(campoActivo.textContent.trim())){
+    campoActivo.textContent = '( )';
+    document.getElementById('editor-texto').value = '( )';
+  }
+  persistirCampoActivo();
+}
+function toggleMarcaCampo(){
+  if(!campoActivo) return;
+  const marcado = campoActivo.textContent.trim() === '(X)';
+  campoActivo.textContent = marcado ? '( )' : '(X)';
+  document.getElementById('editor-texto').value = campoActivo.textContent;
+  persistirCampoActivo();
+}
+function cambiarAncho(delta){
+  if(!campoActivo) return;
+  const actual = parseFloat(campoActivo.style.width) || 10;
+  const nuevo = Math.max(2, Math.min(95, actual + delta));
+  campoActivo.style.width = nuevo.toFixed(1) + '%';
+  persistirCampoActivo();
+}
+function cambiarFuente(delta){
+  if(!campoActivo) return;
+  const actualPx = parseFloat(getComputedStyle(campoActivo).fontSize) || 10;
+  const nuevo = Math.max(6, Math.min(28, actualPx + delta));
+  campoActivo.style.fontSize = nuevo + 'px';
+  persistirCampoActivo();
+}
+function eliminarCampoActivo(){
+  if(!campoActivo) return;
+  if(!confirm('¿Eliminar este campo?')) return;
+  if(campoActivo.dataset.custom === '1'){
+    // Campo creado por el usuario: se borra por completo
+    const pag = campoActivo.dataset.pagina;
+    camposCustom[pag] = (camposCustom[pag]||[]).filter(c => c.id !== campoActivo.id);
+    guardarCamposCustom();
+    campoActivo.remove();
+  } else {
+    // Campo original del código: se oculta (no se puede borrar del HTML fuente desde aquí)
+    ocultosHardcoded[campoActivo.id] = true;
+    guardarOcultos();
+    campoActivo.style.display = 'none';
+  }
+  cerrarEditorCampo();
+}
+
+// ══════════════════════════════════════════
+//  CAMPOS PERSONALIZADOS (creados por el usuario)
+// ══════════════════════════════════════════
+let camposCustom = {1:[], 2:[]};
+let ocultosHardcoded = {};
+let contadorCustom = 0;
+
+function cargarCamposCustom(){
+  try{ camposCustom = JSON.parse(localStorage.getItem('mapeador_campos_custom')||'{"1":[],"2":[]}'); }
+  catch(e){ camposCustom = {1:[], 2:[]}; }
+  if(!camposCustom[1]) camposCustom[1] = [];
+  if(!camposCustom[2]) camposCustom[2] = [];
+}
+function guardarCamposCustom(){
+  localStorage.setItem('mapeador_campos_custom', JSON.stringify(camposCustom));
+}
+function cargarOcultos(){
+  try{ ocultosHardcoded = JSON.parse(localStorage.getItem('mapeador_ocultos')||'{}'); }
+  catch(e){ ocultosHardcoded = {}; }
+}
+function guardarOcultos(){
+  localStorage.setItem('mapeador_ocultos', JSON.stringify(ocultosHardcoded));
+}
+function aplicarOcultos(){
+  Object.keys(ocultosHardcoded).forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
+}
+
+function crearSpanCustom(datos){
+  const span = document.createElement('span');
+  span.className = 'f';
+  span.id = datos.id;
+  span.dataset.custom = '1';
+  span.dataset.tipo = datos.tipo;
+  span.dataset.pagina = datos.pagina;
+  span.dataset.label = datos.label || '';
+  span.style.top = datos.top;
+  span.style.left = datos.left;
+  span.style.width = datos.width;
+  if(datos.fontSize) span.style.fontSize = datos.fontSize;
+  span.textContent = datos.texto;
+  const pagina = document.getElementById('pagina' + datos.pagina);
+  pagina.appendChild(span);
+  if(modoEdicion) bindEventosCampo(span);
+  return span;
+}
+
+function renderCamposCustom(){
+  [1,2].forEach(pag=>{
+    (camposCustom[pag]||[]).forEach(datos => crearSpanCustom(datos));
+  });
+}
+
+function persistirCampoActivo(){
+  if(!campoActivo || campoActivo.dataset.custom !== '1') return;
+  const pag = campoActivo.dataset.pagina;
+  const arr = camposCustom[pag] || [];
+  const idx = arr.findIndex(c => c.id === campoActivo.id);
+  const datos = {
+    id: campoActivo.id,
+    tipo: campoActivo.dataset.tipo,
+    label: campoActivo.dataset.label || '',
+    pagina: pag,
+    top: campoActivo.style.top,
+    left: campoActivo.style.left,
+    width: campoActivo.style.width,
+    fontSize: campoActivo.style.fontSize || '',
+    texto: campoActivo.textContent
+  };
+  if(idx >= 0) arr[idx] = datos; else arr.push(datos);
+  camposCustom[pag] = arr;
+  guardarCamposCustom();
+}
+
+// Se llama también al terminar de arrastrar un campo custom, para guardar su nueva posición
+function persistirSiEsCustom(el){
+  if(el && el.dataset.custom === '1'){
+    campoActivo = el;
+    persistirCampoActivo();
+  }
+}
+
+function paginaActivaVisible(){
+  // Determina en qué página está el usuario viendo (según scroll) para agregar el campo ahí
+  const p1 = document.getElementById('pagina1').getBoundingClientRect();
+  const p2 = document.getElementById('pagina2').getBoundingClientRect();
+  const centroPantalla = window.innerHeight / 2;
+  // Si el centro de pantalla cae dentro del rect de pagina2, usamos pagina 2
+  if(p2.top < centroPantalla && p2.bottom > 0) return 2;
+  return 1;
+}
+
+function agregarCampoTexto(){
+  const pag = paginaActivaVisible();
+  contadorCustom++;
+  const id = 'custom-texto-' + Date.now() + '-' + contadorCustom;
+  const datos = {id, tipo:'texto', pagina:pag, top:'50%', left:'40%', width:'20%', fontSize:'', texto:'Nuevo texto', label:'Campo de texto'};
+  camposCustom[pag].push(datos);
+  guardarCamposCustom();
+  const span = crearSpanCustom(datos);
+  abrirEditorCampo(span);
+}
+function agregarCampoCheckbox(){
+  const pag = paginaActivaVisible();
+  contadorCustom++;
+  const id = 'custom-chk-' + Date.now() + '-' + contadorCustom;
+  const datos = {id, tipo:'checkbox', pagina:pag, top:'50%', left:'40%', width:'6%', fontSize:'', texto:'( )', label:'Checkbox'};
+  camposCustom[pag].push(datos);
+  guardarCamposCustom();
+  const span = crearSpanCustom(datos);
+  abrirEditorCampo(span);
+}
+function agregarCampoMultiple(){
+  const nStr = prompt('¿Cuántas opciones tiene esta pregunta de opción múltiple?', '3');
+  const n = parseInt(nStr, 10);
+  if(!n || n < 2 || n > 8) { if(nStr!==null) alert('Ingresa un número entre 2 y 8'); return; }
+  const pag = paginaActivaVisible();
+  const baseTop = 50;
+  for(let i=0; i<n; i++){
+    contadorCustom++;
+    const id = 'custom-opt-' + Date.now() + '-' + contadorCustom;
+    const datos = {
+      id, tipo:'checkbox', pagina:pag,
+      top: (baseTop + i*3) + '%',
+      left: '40%', width:'6%', fontSize:'',
+      texto: '( ) Opción ' + (i+1),
+      label: 'Opción múltiple ' + (i+1)
+    };
+    camposCustom[pag].push(datos);
+    crearSpanCustom(datos);
+  }
+  guardarCamposCustom();
+  mostrarAvisoOpciones();
+}
+function mostrarAvisoOpciones(){
+  alert('Se crearon los campos de opción múltiple, uno debajo del otro. Arrastra cada uno a su lugar sobre el formato y da doble clic para editar su texto.');
 }
 function copiarCoordenadas(){
-  const spans = document.querySelectorAll('.pagina .f[id]');
-  let out = '';
-  spans.forEach(el=>{
+  let out = '=== CAMPOS ORIGINALES (posiciones actualizadas) ===\n';
+  document.querySelectorAll('.pagina .f[id]').forEach(el=>{
+    if(el.dataset.custom === '1') return;
     out += `#${el.id}{top:${el.style.top};left:${el.style.left}${el.style.width ? ';width:'+el.style.width : ''}}\n`;
   });
+
+  out += '\n=== CAMPOS NUEVOS — agregar este HTML dentro de la página correspondiente ===\n';
+  [1,2].forEach(pag=>{
+    (camposCustom[pag]||[]).forEach(c=>{
+      out += `<span class="f" id="${c.id}" data-tipo="${c.tipo}" style="top:${c.top};left:${c.left};width:${c.width}${c.fontSize?';font-size:'+c.fontSize:''}">${c.texto}</span>  <!-- Página ${c.pagina} · ${c.label||''} -->\n`;
+    });
+  });
+
+  const ocultos = Object.keys(ocultosHardcoded);
+  if(ocultos.length){
+    out += '\n=== CAMPOS ORIGINALES OCULTADOS (bórralos o coméntalos en el HTML fuente) ===\n';
+    out += ocultos.join(', ') + '\n';
+  }
+
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(out).then(()=>{
       alert('Coordenadas copiadas al portapapeles. Pégalas y compártelas para actualizar el archivo definitivo.');
@@ -683,15 +993,30 @@ function copiarCoordenadas(){
 }
 
 // ══════════════════════════════════════════
-//  INICIO: cargar último registro automáticamente
+//  INICIO: cargar registro correcto según ?folio=, y campos personalizados
 // ══════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', ()=>{
+  cargarCamposCustom();
+  cargarOcultos();
+  renderCamposCustom();
+  aplicarOcultos();
+
   const regs = obtenerRegistros();
-  if(regs.length > 0){
-    llenarFormato(regs[regs.length - 1]);
-  } else {
-    // Mostrar selector automáticamente si no hay datos
-    // abrirSelector(); // Comentado para no asustar si es primera vez
+  const folioURL = new URLSearchParams(window.location.search).get('folio');
+  let registroElegido = null;
+
+  if(folioURL){
+    registroElegido = regs.find(r => (r.folio||'').trim().toLowerCase() === folioURL.trim().toLowerCase());
+    if(!registroElegido){
+      // No existe ese folio capturado todavía: avisar y dejar el selector disponible
+      document.getElementById('folio-actual').textContent = `Folio ${folioURL} no encontrado`;
+    }
+  }
+  if(!registroElegido && regs.length > 0){
+    registroElegido = regs[regs.length - 1];
+  }
+  if(registroElegido){
+    llenarFormato(registroElegido);
   }
 });
 </script>
