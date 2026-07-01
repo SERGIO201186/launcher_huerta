@@ -341,7 +341,7 @@ input::placeholder,textarea::placeholder{color:var(--azul-borde);}
 
       <div class="campo">
         <label>Estado civil <span class="req">*</span></label>
-        <select id="estadoCivilFinado">
+        <select id="estadoCivilFinado" onchange="toggleConyugue()">
           <option value="">— Seleccionar —</option>
           <option>Soltero(a)</option>
           <option>Casado(a)</option>
@@ -349,6 +349,34 @@ input::placeholder,textarea::placeholder{color:var(--azul-borde);}
           <option>Divorciado(a)</option>
           <option>Unión libre</option>
         </select>
+      </div>
+
+      <div id="bloque-conyugue" style="display:none; background:rgba(201,162,75,0.05); border:1px solid rgba(201,162,75,0.2); border-radius:10px; padding:14px; margin-bottom:14px;">
+        <div style="font-size:11px;color:var(--dorado-suave);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;">Datos del conyuge</div>
+        <div class="campo">
+          <label>Nombre completo del conyuge <span class="req">*</span></label>
+          <input type="text" id="nombreConyugue" placeholder="Nombre(s) Apellido Paterno Apellido Materno">
+        </div>
+        <div class="campo">
+          <label>Fecha de nacimiento</label>
+          <div class="campo-edad">
+            <div class="campo">
+              <input type="date" id="fechaNacConyugue" oninput="calcularEdad('fechaNacConyugue','edadConyugue','edadConyugueSub')">
+            </div>
+            <div style="text-align:center;">
+              <div class="edad-display" id="edadConyugue">--</div>
+              <div class="edad-sub" id="edadConyugueSub">anos</div>
+            </div>
+          </div>
+        </div>
+        <div class="campo">
+          <label>Lugar de nacimiento</label>
+          <div class="fila3">
+            <input type="text" id="conyugueLocalidad" placeholder="Localidad">
+            <input type="text" id="conyugueMunicipio" placeholder="Municipio">
+            <input type="text" id="conyugueEstado" placeholder="Estado">
+          </div>
+        </div>
       </div>
 
       <div class="campo">
@@ -632,6 +660,14 @@ function cambiarTab(id, btn){
 }
 
 // ═══════════════════════════════════════════
+//  CONYUGUE
+// ═══════════════════════════════════════════
+function toggleConyugue(){
+  const val = document.getElementById('estadoCivilFinado').value;
+  document.getElementById('bloque-conyugue').style.display = val === 'Casado(a)' ? 'block' : 'none';
+}
+
+// ═══════════════════════════════════════════
 //  EDAD AUTOMÁTICA
 // ═══════════════════════════════════════════
 function calcularEdad(inputId, displayId, subId){
@@ -810,6 +846,13 @@ function recolectarDatos(){
       estadoCivil: g('estadoCivilFinado'),
       fechaNacimiento: g('fechaNacFinado'),
       edad: document.getElementById('edadFinado').textContent,
+      conyugue: document.getElementById('estadoCivilFinado').value === 'Casado(a)' ? {
+        nombre: g('nombreConyugue'),
+        fechaNacimiento: g('fechaNacConyugue'),
+        localidad: g('conyugueLocalidad'),
+        municipio: g('conyugueMunicipio'),
+        estado: g('conyugueEstado'),
+      } : null,
       nacLocalidad: g('nacLocalidad'),
       nacMunicipio: g('nacMunicipio'),
       nacEstado: g('nacEstado'),
@@ -900,6 +943,16 @@ function cargarRegistro(id){
   set('nombreFinado',f.nombre); set('curpFinado',f.curp); set('sexoFinado',f.sexo);
   set('estadoCivilFinado',f.estadoCivil); set('fechaNacFinado',f.fechaNacimiento);
   calcularEdad('fechaNacFinado','edadFinado','edadFinadoSub');
+  if(f.conyugue){
+    document.getElementById('estadoCivilFinado').value='Casado(a)';
+    toggleConyugue();
+    set('nombreConyugue',f.conyugue.nombre);
+    set('fechaNacConyugue',f.conyugue.fechaNacimiento);
+    calcularEdad('fechaNacConyugue','edadConyugue','edadConyugueSub');
+    set('conyugueLocalidad',f.conyugue.localidad);
+    set('conyugueMunicipio',f.conyugue.municipio);
+    set('conyugueEstado',f.conyugue.estado);
+  } else { toggleConyugue(); }
   set('nacLocalidad',f.nacLocalidad); set('nacMunicipio',f.nacMunicipio); set('nacEstado',f.nacEstado);
   set('nacionalidad',f.nacionalidad); set('escolaridad',f.escolaridad);
   set('ocupacion',f.ocupacion); set('atencionMedica',f.atencionMedica);
