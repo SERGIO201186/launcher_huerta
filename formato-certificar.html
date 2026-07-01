@@ -780,11 +780,11 @@ input::placeholder,textarea::placeholder{color:var(--azul-borde);}
         </div>
         <div class="fila2">
           <div class="campo"><label>Boleta / Oficio</label><input type="text" id="rc-boleta" placeholder="Opcional"></div>
-          <div class="campo"><label>No. de Folio (Registro Civil)</label><input type="text" id="rc-folio" placeholder="Opcional"></div>
-        </div>
-        <div class="fila2">
           <div class="campo"><label>No. de Acta</label><input type="text" id="rc-numacta" placeholder="Opcional"></div>
-          <div class="campo"><label>Fecha del acta</label><input type="date" id="rc-fechaacta"></div>
+        </div>
+        <div class="campo">
+          <label>Fecha del acta</label>
+          <input type="date" id="rc-fechaacta">
         </div>
       </div>
 
@@ -1446,7 +1446,6 @@ function construirHojaImprimible(){
           <div>Recibo Expediente: ${document.getElementById('rc-recibo').value||''}</div>
           <div>Captura acta: ${document.getElementById('rc-captura').value||''}</div>
           <div>Boleta/Oficio: ${document.getElementById('rc-boleta').value||''}</div>
-          <div>No. Folio: ${document.getElementById('rc-folio').value||''}</div>
         </div>
       </div>
       <div class="of-titulo-doc">FORMATO DE REGISTRO DE DEFUNCIÓN</div>
