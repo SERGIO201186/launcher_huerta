@@ -880,6 +880,21 @@ const ESTADOS_CIVILES = ['Soltero(a)','Casado(a)','Viudo(a)','Divorciado(a)','Un
 //  INIT
 // ═══════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', ()=>{
+  // Abrir pestaña según parámetro URL (ej: ?tab=registro viene del mapeador)
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabParam = urlParams.get('tab');
+  if(tabParam === 'registro'){
+    const tabBtn = document.querySelector('.tab[onclick*="formato"]');
+    if(tabBtn){
+      cambiarTab('formato', tabBtn);
+      // Auto-seleccionar el registro más reciente
+      const regsAuto = obtenerRegistros();
+      if(regsAuto.length > 0){
+        const masReciente = regsAuto[regsAuto.length-1];
+        seleccionarRegistroFormato(masReciente.id);
+      }
+    }
+  }
   // Fecha de hoy por defecto
   const hoy = new Date().toISOString().split('T')[0];
   document.getElementById('fechaFormato').value = hoy;
