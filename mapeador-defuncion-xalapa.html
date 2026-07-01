@@ -95,10 +95,40 @@ body{background:#4a4a4a;font-family:Arial,sans-serif;}
   letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;
 }
 
+/* ── MODO EDICIÓN DE COORDENADAS ── */
+.modo-edicion .f{
+  outline:1px dashed rgba(255,59,59,0.65);
+  cursor:move;
+  min-width:8px;min-height:10px;
+}
+.modo-edicion .f:hover{
+  outline-color:#ff3b3b;
+  background:rgba(255,235,59,0.25);
+}
+.panel-edicion{
+  position:fixed;bottom:0;left:0;right:0;
+  background:#1a1a2e;color:#e3c878;
+  padding:10px 16px;display:none;align-items:center;
+  justify-content:space-between;gap:10px;z-index:300;
+  border-top:2px solid #c9a24b;flex-wrap:wrap;
+}
+.panel-edicion span{font-size:11.5px;color:#9aa5b8;}
+#pin-input{
+  width:100%;padding:14px;border-radius:8px;border:1px solid #27324d;
+  background:#1e2d45;color:#f4f1ea;font-size:22px;text-align:center;
+  letter-spacing:10px;margin-bottom:14px;
+}
+#pin-error{color:#d8553f;font-size:12px;margin-bottom:10px;display:none;}
+.modal-btn-pin{
+  width:100%;padding:11px;border-radius:8px;border:none;
+  background:#c9a24b;color:#0f172a;font-size:13px;font-weight:700;
+  cursor:pointer;margin-bottom:8px;
+}
+
 /* ── IMPRIMIR ── */
 @media print{
   body{background:white;}
-  .toolbar,.modal-overlay,.pagina-label{display:none!important;}
+  .toolbar,.modal-overlay,.pagina-label,.panel-edicion{display:none!important;}
   .paginas{padding:0;gap:0;}
   .pagina{
     max-width:100%;
@@ -121,6 +151,7 @@ body{background:#4a4a4a;font-family:Arial,sans-serif;}
     <span class="folio-info" id="folio-actual">Sin registro cargado</span>
     <button class="btn btn-gris" onclick="abrirSelector()">📂 Cargar registro</button>
     <button class="btn btn-dorado" onclick="window.print()">🖨️ Imprimir</button>
+    <button class="btn btn-gris" id="btn-editar" onclick="abrirPin()">🔒 Editar</button>
   </div>
 </div>
 
@@ -130,6 +161,27 @@ body{background:#4a4a4a;font-family:Arial,sans-serif;}
     <h2>Seleccionar registro a imprimir</h2>
     <div class="modal-list" id="modal-lista"></div>
     <button class="modal-btn-cerrar" onclick="cerrarSelector()">Cancelar</button>
+  </div>
+</div>
+
+<!-- ── MODAL PIN (edición de coordenadas / documentos) ── -->
+<div class="modal-overlay" id="modal-pin" style="display:none;">
+  <div class="modal">
+    <h2>🔒 Acceso a edición</h2>
+    <p style="color:#9aa5b8;font-size:12.5px;margin-bottom:14px;">Ingresa el NIP para editar coordenadas y documentos.</p>
+    <input type="password" id="pin-input" maxlength="4" inputmode="numeric" placeholder="••••">
+    <div id="pin-error">NIP incorrecto</div>
+    <button class="modal-btn-pin" onclick="verificarPin()">Ingresar</button>
+    <button class="modal-btn-cerrar" onclick="cerrarPin()">Cancelar</button>
+  </div>
+</div>
+
+<!-- ── PANEL DE MODO EDICIÓN ── -->
+<div class="panel-edicion" id="panel-edicion">
+  <span>Modo edición activo — arrastra los campos para reposicionarlos · doble clic para editar el texto</span>
+  <div style="display:flex;gap:8px;">
+    <button class="btn btn-dorado" onclick="copiarCoordenadas()">📋 Copiar coordenadas</button>
+    <button class="btn btn-rojo" onclick="salirEdicion()">🔓 Salir</button>
   </div>
 </div>
 
@@ -182,6 +234,8 @@ body{background:#4a4a4a;font-family:Arial,sans-serif;}
       <span class="f" id="f-dom-local"   style="top:22.8%;left:9%;width:20%"></span>
       <span class="f" id="f-dom-mun"     style="top:22.8%;left:32%;width:22%"></span>
       <span class="f" id="f-dom-ent"     style="top:22.8%;left:57%;width:23%"></span>
+      <!-- País del domicilio — posición provisional, ajustar en modo edición contra el formato real -->
+      <span class="f" id="f-dom-pais"    style="top:22.8%;left:83%;width:10%">México</span>
 
       <!-- Estado civil -->
       <span class="f" id="f-ec-soltero"  style="top:24.3%;left:27%;"></span>
@@ -300,9 +354,9 @@ body{background:#4a4a4a;font-family:Arial,sans-serif;}
       <span class="f" id="f-t2-dom-ent"  style="top:86%;left:57%;width:23%"></span>
 
       <!-- ══ DATOS DE LA FUNERARIA ══ -->
-      <span class="f" style="top:90%;left:20%;width:55%">FUNERARIA HUERTA</span>
-      <span class="f" style="top:90%;left:77%;width:20%">228-XXX-XXXX</span>
-      <span class="f" style="top:91.5%;left:9%;width:25%">XALAPA, VER.</span>
+      <span class="f" style="top:90%;left:20%;width:55%">Servicios Funerarios Huerta</span>
+      <span class="f" style="top:90%;left:77%;width:20%">228 184 5114</span>
+      <span class="f" style="top:91.5%;left:9%;width:25%">Xalapa, Ver.</span>
       <span class="f" id="f-funerario"   style="top:93%;left:9%;width:70%"></span>
 
     </div>
@@ -394,13 +448,15 @@ function llenarFormato(r){
   set('f-dom-local', fin.domLocalidad);
   set('f-dom-mun',   fin.domMunicipio);
   set('f-dom-ent',   fin.domEstado);
+  set('f-dom-pais',  fin.domPais || 'México');
+  set('f-nac-pais',  fin.nacPais || 'México');
 
   // — Estado civil —
   const ec = fin.estadoCivil || '';
   set('f-ec-soltero', ec.includes('Soltero') || ec.includes('Viudo') || ec.includes('Divorciado') ? 'X' : '');
   set('f-ec-casado',  ec.includes('Casado') || ec.includes('libre') ? 'X' : '');
 
-  // — Cónyuge —
+  // — Cónyuge (esposo/esposa) —
   if(fin.conyugue){
     const c = fin.conyugue;
     set('f-conyuge-nom', c.nombre);
@@ -408,6 +464,8 @@ function llenarFormato(r){
     set('f-conyuge-fnac-dia', fc.dia);
     set('f-conyuge-fnac-mes', fc.mes);
     set('f-conyuge-fnac-ano', fc.ano);
+    // Sexo del cónyuge = opuesto al sexo del finado
+    set('f-conyuge-sexo', sexo === 'H' ? 'M' : sexo === 'M' ? 'H' : '');
     set('f-conyuge-local', c.localidad);
     set('f-conyuge-mun',   c.municipio);
     set('f-conyuge-ent',   c.estado);
@@ -416,6 +474,9 @@ function llenarFormato(r){
   // — Padre —
   const padre = r.padre || {};
   set('f-padre-nom', padre.nombre);
+  set('f-padre-sexo', padre.sexo || 'H');
+  const fp = parseFecha(padre.fechaNacimiento);
+  set('f-padre-fnac-dia', fp.dia); set('f-padre-fnac-mes', fp.mes); set('f-padre-fnac-ano', fp.ano);
   if(padre.estado === 'vivo'){
     set('f-padre-local', padre.localidad);
     set('f-padre-mun',   padre.municipio);
@@ -427,6 +488,9 @@ function llenarFormato(r){
   // — Madre —
   const madre = r.madre || {};
   set('f-madre-nom', madre.nombre);
+  set('f-madre-sexo', madre.sexo || 'M');
+  const fm = parseFecha(madre.fechaNacimiento);
+  set('f-madre-fnac-dia', fm.dia); set('f-madre-fnac-mes', fm.mes); set('f-madre-fnac-ano', fm.ano);
   if(madre.estado === 'vivo'){
     set('f-madre-local', madre.localidad);
     set('f-madre-mun',   madre.municipio);
@@ -482,7 +546,8 @@ function llenarFormato(r){
   set('f-t2-tel',  t2.telefono);
 
   // ══ FUNERARIO ══
-  set('f-funerario', 'Nombre del funerario: ________________');
+  const fu = r.funeraria || {};
+  set('f-funerario', fu.asesor ? 'Asesor funerario: '+fu.asesor : 'Nombre del funerario: ________________');
 
   // Actualizar barra
   document.getElementById('folio-actual').textContent =
@@ -517,6 +582,104 @@ function seleccionarRegistro(id){
   const r = obtenerRegistros().find(x => x.id === id);
   if(r){ llenarFormato(r); }
   cerrarSelector();
+}
+
+// ══════════════════════════════════════════
+//  MODO EDICIÓN — PIN, ARRASTRE Y EDICIÓN DE TEXTO
+// ══════════════════════════════════════════
+const PIN_EDICION = '2709';
+let modoEdicion = false;
+let elemActivo = null;
+let rectPagina = null;
+
+function abrirPin(){
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-error').style.display = 'none';
+  document.getElementById('modal-pin').style.display = 'flex';
+  setTimeout(()=>document.getElementById('pin-input').focus(), 100);
+}
+function cerrarPin(){
+  document.getElementById('modal-pin').style.display = 'none';
+}
+function verificarPin(){
+  const val = document.getElementById('pin-input').value.trim();
+  if(val === PIN_EDICION){
+    cerrarPin();
+    activarEdicion();
+  } else {
+    document.getElementById('pin-error').style.display = 'block';
+  }
+}
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter' && document.getElementById('modal-pin').style.display === 'flex'){
+    verificarPin();
+  }
+});
+
+function activarEdicion(){
+  modoEdicion = true;
+  document.body.classList.add('modo-edicion');
+  document.getElementById('panel-edicion').style.display = 'flex';
+  document.getElementById('btn-editar').textContent = '🔓 Editando…';
+  document.querySelectorAll('.f').forEach(el=>{
+    el.addEventListener('mousedown', iniciarArrastre);
+    el.addEventListener('touchstart', iniciarArrastre, {passive:false});
+    el.addEventListener('dblclick', editarTexto);
+  });
+}
+function salirEdicion(){
+  modoEdicion = false;
+  document.body.classList.remove('modo-edicion');
+  document.getElementById('panel-edicion').style.display = 'none';
+  document.getElementById('btn-editar').textContent = '🔒 Editar';
+}
+
+function iniciarArrastre(e){
+  if(!modoEdicion) return;
+  e.preventDefault();
+  elemActivo = e.currentTarget;
+  const pagina = elemActivo.closest('.pagina');
+  rectPagina = pagina.getBoundingClientRect();
+  document.addEventListener('mousemove', moverArrastre);
+  document.addEventListener('touchmove', moverArrastre, {passive:false});
+  document.addEventListener('mouseup', terminarArrastre);
+  document.addEventListener('touchend', terminarArrastre);
+}
+function moverArrastre(e){
+  if(!elemActivo) return;
+  e.preventDefault();
+  const t = e.touches ? e.touches[0] : e;
+  let leftPct = ((t.clientX - rectPagina.left) / rectPagina.width) * 100;
+  let topPct  = ((t.clientY - rectPagina.top)  / rectPagina.height) * 100;
+  leftPct = Math.max(0, Math.min(100, leftPct));
+  topPct  = Math.max(0, Math.min(100, topPct));
+  elemActivo.style.left = leftPct.toFixed(2) + '%';
+  elemActivo.style.top  = topPct.toFixed(2) + '%';
+}
+function terminarArrastre(){
+  elemActivo = null;
+  document.removeEventListener('mousemove', moverArrastre);
+  document.removeEventListener('touchmove', moverArrastre);
+}
+function editarTexto(e){
+  if(!modoEdicion) return;
+  const el = e.currentTarget;
+  const nuevo = prompt('Editar texto del campo "'+el.id+'":', el.textContent);
+  if(nuevo !== null) el.textContent = nuevo;
+}
+function copiarCoordenadas(){
+  const spans = document.querySelectorAll('.pagina .f[id]');
+  let out = '';
+  spans.forEach(el=>{
+    out += `#${el.id}{top:${el.style.top};left:${el.style.left}${el.style.width ? ';width:'+el.style.width : ''}}\n`;
+  });
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(out).then(()=>{
+      alert('Coordenadas copiadas al portapapeles. Pégalas y compártelas para actualizar el archivo definitivo.');
+    }).catch(()=>{ prompt('Copia manualmente estas coordenadas:', out); });
+  } else {
+    prompt('Copia manualmente estas coordenadas:', out);
+  }
 }
 
 // ══════════════════════════════════════════
