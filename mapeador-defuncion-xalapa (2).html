@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapeador — Registro de Defunción Xalapa</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#4a4a4a;font-family:Arial,sans-serif;}
+
+/* ── CONTROLES SUPERIORES ── */
+.toolbar{
+  background:#1a1a2e;color:#e3c878;
+  padding:10px 16px;display:flex;align-items:center;
+  justify-content:space-between;gap:10px;flex-wrap:wrap;
+  position:sticky;top:0;z-index:200;
+}
+.toolbar h1{font-size:14px;letter-spacing:0.05em;}
+.toolbar-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{padding:7px 16px;border-radius:7px;border:none;
+  font-size:12px;cursor:pointer;font-weight:600;letter-spacing:0.04em;}
+.btn-dorado{background:#c9a24b;color:#0f172a;}
+.btn-gris{background:rgba(255,255,255,0.1);color:#e3c878;border:1px solid rgba(201,162,75,0.3);}
+.btn-rojo{background:rgba(216,85,63,0.8);color:#fff;}
+.btn:active{opacity:0.8;}
+
+.folio-info{font-size:12px;color:#9aa5b8;background:rgba(255,255,255,0.05);
+  padding:5px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);}
+
+/* ── SELECTOR DE FOLIO ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.85);
+  z-index:500;display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+.modal{
+  background:#16213a;border:1px solid #27324d;border-radius:14px;
+  padding:24px;width:100%;max-width:480px;
+}
+.modal h2{font-size:16px;color:#e3c878;margin-bottom:16px;letter-spacing:0.04em;}
+.modal-list{max-height:300px;overflow-y:auto;margin-bottom:16px;}
+.modal-item{
+  background:rgba(255,255,255,0.03);border:1px solid #27324d;
+  border-radius:8px;padding:12px 14px;margin-bottom:8px;cursor:pointer;
+  transition:border-color .15s;
+}
+.modal-item:active{border-color:#c9a24b;}
+.modal-folio{font-size:11px;color:#e3c878;letter-spacing:0.06em;text-transform:uppercase;}
+.modal-nombre{font-size:14px;font-weight:600;color:#f4f1ea;margin-top:2px;}
+.modal-fecha{font-size:11px;color:#9aa5b8;margin-top:2px;}
+.modal-vacio{text-align:center;color:#9aa5b8;font-size:13px;padding:30px;}
+.modal-btn-cerrar{
+  width:100%;padding:11px;border-radius:8px;background:rgba(255,255,255,0.07);
+  border:1px solid #27324d;color:#9aa5b8;font-size:13px;cursor:pointer;
+}
+
+/* ── PÁGINAS DEL FORMATO ── */
+.paginas{padding:20px;display:flex;flex-direction:column;gap:30px;align-items:center;}
+
+/* Contenedor de página — proporcional a oficio 8.5x14" */
+.pagina{
+  position:relative;
+  width:100%;
+  max-width:900px;
+  background:#fff;
+  box-shadow:0 4px 24px rgba(0,0,0,0.5);
+}
+.pagina img.fondo{
+  width:100%;height:auto;display:block;
+  user-select:none;pointer-events:none;
+}
+
+/* ── CAMPOS SOBRE LA IMAGEN ── */
+/* Todos los campos se posicionan en % sobre el contenedor .pagina */
+.f{
+  position:absolute;
+  font-family:Arial,sans-serif;
+  font-size:1.1vw;  /* escala proporcional */
+  color:#00008B;    /* azul oscuro como tinta */
+  line-height:1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+/* Para pantallas grandes */
+@media(min-width:900px){ .f{font-size:10px;} }
+/* Para pantallas pequeñas */
+@media(max-width:600px){ .f{font-size:2.2vw;} }
+
+.f.check::before{content:"✓";font-weight:bold;}
+
+/* ── PÁGINA 2 ETIQUETA ── */
+.pagina-label{
+  text-align:center;color:#9aa5b8;font-size:12px;
+  letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;
+}
+
+/* ── IMPRIMIR ── */
+@media print{
+  body{background:white;}
+  .toolbar,.modal-overlay,.pagina-label{display:none!important;}
+  .paginas{padding:0;gap:0;}
+  .pagina{
+    max-width:100%;
+    width:21.59cm;
+    page-break-after:always;
+    box-shadow:none;
+  }
+  .pagina:last-child{page-break-after:avoid;}
+  @page{size:letter portrait;margin:0;}
+  .f{font-size:7.5pt!important;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── TOOLBAR ── -->
+<div class="toolbar">
+  <h1>📄 Mapeador · Registro de Defunción · Xalapa</h1>
+  <div class="toolbar-btns">
+    <span class="folio-info" id="folio-actual">Sin registro cargado</span>
+    <button class="btn btn-gris" onclick="abrirSelector()">📂 Cargar registro</button>
+    <button class="btn btn-dorado" onclick="window.print()">🖨️ Imprimir</button>
+  </div>
+</div>
+
+<!-- ── MODAL SELECTOR ── -->
+<div class="modal-overlay" id="modal" style="display:none;">
+  <div class="modal">
+    <h2>Seleccionar registro a imprimir</h2>
+    <div class="modal-list" id="modal-lista"></div>
+    <button class="modal-btn-cerrar" onclick="cerrarSelector()">Cancelar</button>
+  </div>
+</div>
+
+<!-- ── PÁGINAS DEL FORMATO ── -->
+<div class="paginas">
+
+  <!-- PÁGINA 1 — Hoja principal -->
+  <div>
+    <div class="pagina-label">Página 1 — Datos del finado, declarante, testigos y funeraria</div>
+    <div class="pagina" id="pagina1">
+      <img class="fondo" src="formato_p1.png" alt="Formato Registro de Defunción">
+
+      <!-- ══ EXCLUSIVO REGISTRO CIVIL (esquina superior derecha) ══ -->
+      <!-- Sin datos del capturador, se llena en ventanilla -->
+
+      <!-- ══ No. DE ACTA ══ -->
+      <!-- También se llena en ventanilla -->
+
+      <!-- ══ FECHA DEL FORMATO ══ -->
+      <span class="f" id="f-fecha-dia"   style="top:8.1%;left:48.5%;width:4%"></span>
+      <span class="f" id="f-fecha-mes"   style="top:8.1%;left:54%;width:5%"></span>
+      <span class="f" id="f-fecha-ano"   style="top:8.1%;left:61%;width:6%"></span>
+
+      <!-- ══ DATOS DEL FINADO ══ -->
+      <span class="f" id="f-curp"        style="top:11%;left:9%;width:55%"></span>
+      <!-- Sexo -->
+      <span class="f" id="f-sexo-h"      style="top:11%;left:84%;"></span>
+      <span class="f" id="f-sexo-m"      style="top:11%;left:91%;"></span>
+
+      <!-- Nombre: nombre(s) | primer apellido | segundo apellido -->
+      <span class="f" id="f-nombres"     style="top:13.3%;left:9%;width:28%"></span>
+      <span class="f" id="f-ap1"         style="top:13.3%;left:41%;width:24%"></span>
+      <span class="f" id="f-ap2"         style="top:13.3%;left:68%;width:23%"></span>
+
+      <!-- Fecha de nacimiento | edad | nacionalidad -->
+      <span class="f" id="f-fnac-dia"    style="top:16%;left:22.5%;width:4%"></span>
+      <span class="f" id="f-fnac-mes"    style="top:16%;left:28%;width:4%"></span>
+      <span class="f" id="f-fnac-ano"    style="top:16%;left:33%;width:5%"></span>
+      <span class="f" id="f-edad"        style="top:16%;left:48%;width:6%"></span>
+      <span class="f" id="f-nacionalidad" style="top:16%;left:60%;width:30%"></span>
+
+      <!-- Lugar de nacimiento (localidad | municipio | entidad | pais) -->
+      <span class="f" id="f-nac-local"   style="top:18.2%;left:9%;width:20%"></span>
+      <span class="f" id="f-nac-mun"     style="top:18.2%;left:32%;width:22%"></span>
+      <span class="f" id="f-nac-ent"     style="top:18.2%;left:57%;width:23%"></span>
+      <span class="f" id="f-nac-pais"    style="top:18.2%;left:83%;width:10%">México</span>
+
+      <!-- Domicilio habitual -->
+      <span class="f" id="f-dom-calle"   style="top:20.8%;left:9%;width:82%"></span>
+      <span class="f" id="f-dom-local"   style="top:22.8%;left:9%;width:20%"></span>
+      <span class="f" id="f-dom-mun"     style="top:22.8%;left:32%;width:22%"></span>
+      <span class="f" id="f-dom-ent"     style="top:22.8%;left:57%;width:23%"></span>
+
+      <!-- Estado civil -->
+      <span class="f" id="f-ec-soltero"  style="top:24.3%;left:27%;"></span>
+      <span class="f" id="f-ec-casado"   style="top:24.3%;left:41%;"></span>
+
+      <!-- Cónyuge -->
+      <span class="f" id="f-conyuge-nom" style="top:26%;left:20%;width:50%"></span>
+      <span class="f" id="f-conyuge-nac" style="top:26%;left:76%;width:20%"></span>
+      <span class="f" id="f-conyuge-fnac-dia" style="top:27.6%;left:22.5%;width:4%"></span>
+      <span class="f" id="f-conyuge-fnac-mes" style="top:27.6%;left:28%;width:4%"></span>
+      <span class="f" id="f-conyuge-fnac-ano" style="top:27.6%;left:33%;width:5%"></span>
+      <span class="f" id="f-conyuge-sexo" style="top:27.6%;left:53%;width:15%"></span>
+      <span class="f" id="f-conyuge-local" style="top:29.3%;left:9%;width:20%"></span>
+      <span class="f" id="f-conyuge-mun"   style="top:29.3%;left:32%;width:22%"></span>
+      <span class="f" id="f-conyuge-ent"   style="top:29.3%;left:57%;width:23%"></span>
+
+      <!-- Padre -->
+      <span class="f" id="f-padre-nom"   style="top:30.9%;left:20%;width:50%"></span>
+      <span class="f" id="f-padre-nac"   style="top:30.9%;left:76%;width:20%">Mexicana</span>
+      <span class="f" id="f-padre-fnac-dia" style="top:32.5%;left:22.5%;width:4%"></span>
+      <span class="f" id="f-padre-fnac-mes" style="top:32.5%;left:28%;width:4%"></span>
+      <span class="f" id="f-padre-fnac-ano" style="top:32.5%;left:33%;width:5%"></span>
+      <span class="f" id="f-padre-sexo"  style="top:32.5%;left:53%;width:12%">M</span>
+      <span class="f" id="f-padre-local" style="top:34.2%;left:9%;width:20%"></span>
+      <span class="f" id="f-padre-mun"   style="top:34.2%;left:32%;width:22%"></span>
+      <span class="f" id="f-padre-ent"   style="top:34.2%;left:57%;width:23%"></span>
+      <span class="f" id="f-padre-pais"  style="top:34.2%;left:83%;width:10%">México</span>
+
+      <!-- Madre -->
+      <span class="f" id="f-madre-nom"   style="top:35.7%;left:20%;width:50%"></span>
+      <span class="f" id="f-madre-nac"   style="top:35.7%;left:76%;width:20%">Mexicana</span>
+      <span class="f" id="f-madre-fnac-dia" style="top:37.4%;left:22.5%;width:4%"></span>
+      <span class="f" id="f-madre-fnac-mes" style="top:37.4%;left:28%;width:4%"></span>
+      <span class="f" id="f-madre-fnac-ano" style="top:37.4%;left:33%;width:5%"></span>
+      <span class="f" id="f-madre-sexo"  style="top:37.4%;left:53%;width:12%">F</span>
+      <span class="f" id="f-madre-local" style="top:39%;left:9%;width:20%"></span>
+      <span class="f" id="f-madre-mun"   style="top:39%;left:32%;width:22%"></span>
+      <span class="f" id="f-madre-ent"   style="top:39%;left:57%;width:23%"></span>
+      <span class="f" id="f-madre-pais"  style="top:39%;left:83%;width:10%">México</span>
+
+      <!-- ══ DATOS DEL DECLARANTE ══ -->
+      <span class="f" id="f-dec-nom"     style="top:41.8%;left:19%;width:60%"></span>
+      <span class="f" id="f-dec-edad"    style="top:41.8%;left:88%;width:8%"></span>
+      <span class="f" id="f-dec-par"     style="top:43.5%;left:14%;width:22%"></span>
+      <span class="f" id="f-dec-nacion"  style="top:43.5%;left:42%;width:20%">Mexicana</span>
+      <span class="f" id="f-dec-ec"      style="top:43.5%;left:72%;width:20%"></span>
+      <span class="f" id="f-dec-local"   style="top:45.2%;left:9%;width:20%"></span>
+      <span class="f" id="f-dec-mun"     style="top:45.2%;left:32%;width:22%"></span>
+      <span class="f" id="f-dec-ent"     style="top:45.2%;left:57%;width:23%"></span>
+      <!-- Domicilio del declarante -->
+      <span class="f" id="f-dec-calle"   style="top:47.3%;left:16%;width:40%"></span>
+      <span class="f" id="f-dec-noext"   style="top:47.3%;left:58%;width:22%"></span>
+      <span class="f" id="f-dec-col"     style="top:47.3%;left:82%;width:16%"></span>
+      <span class="f" id="f-dec-dom-loc" style="top:49%;left:9%;width:20%"></span>
+      <span class="f" id="f-dec-dom-mun" style="top:49%;left:32%;width:22%"></span>
+      <span class="f" id="f-dec-dom-ent" style="top:49%;left:57%;width:23%"></span>
+      <span class="f" id="f-dec-fnac-dia" style="top:50.7%;left:17%;width:4%"></span>
+      <span class="f" id="f-dec-fnac-mes" style="top:50.7%;left:22%;width:4%"></span>
+      <span class="f" id="f-dec-fnac-ano" style="top:50.7%;left:27%;width:5%"></span>
+      <span class="f" id="f-dec-tel"     style="top:50.7%;left:57%;width:25%"></span>
+
+      <!-- ══ DATOS DEL FALLECIMIENTO ══ -->
+      <span class="f" id="f-def-dia"     style="top:53.8%;left:17%;width:4%"></span>
+      <span class="f" id="f-def-mes"     style="top:53.8%;left:23%;width:4%"></span>
+      <span class="f" id="f-def-ano"     style="top:53.8%;left:29%;width:5%"></span>
+      <span class="f" id="f-def-hora"    style="top:53.8%;left:57%;width:20%"></span>
+      <span class="f" id="f-def-lugar"   style="top:55.8%;left:9%;width:50%"></span>
+      <span class="f" id="f-def-cert"    style="top:55.8%;left:66%;width:25%"></span>
+      <!-- Destino -->
+      <span class="f" id="f-dest-inhu"   style="top:57.5%;left:20%;"></span>
+      <span class="f" id="f-dest-crem"   style="top:57.5%;left:38%;"></span>
+      <span class="f" id="f-dest-tras"   style="top:57.5%;left:56%;width:25%"></span>
+      <span class="f" id="f-panteon"     style="top:59.2%;left:20%;width:55%"></span>
+      <span class="f" id="f-ubicacion"   style="top:60.8%;left:9%;width:82%"></span>
+
+      <!-- ══ TESTIGO 1 ══ -->
+      <span class="f" id="f-t1-curp"     style="top:63%;left:9%;width:40%"></span>
+      <span class="f" id="f-t1-tel"      style="top:63%;left:57%;width:30%"></span>
+      <span class="f" id="f-t1-nom"      style="top:64.8%;left:9%;width:82%"></span>
+      <span class="f" id="f-t1-fnac-dia" style="top:66.5%;left:18%;width:4%"></span>
+      <span class="f" id="f-t1-fnac-mes" style="top:66.5%;left:23%;width:4%"></span>
+      <span class="f" id="f-t1-fnac-ano" style="top:66.5%;left:28%;width:5%"></span>
+      <span class="f" id="f-t1-edad"     style="top:66.5%;left:44%;width:6%"></span>
+      <span class="f" id="f-t1-sexo"     style="top:66.5%;left:62%;width:15%"></span>
+      <span class="f" id="f-t1-local"    style="top:68.3%;left:9%;width:20%"></span>
+      <span class="f" id="f-t1-mun"      style="top:68.3%;left:32%;width:22%"></span>
+      <span class="f" id="f-t1-ent"      style="top:68.3%;left:57%;width:23%"></span>
+      <span class="f" id="f-t1-pais"     style="top:68.3%;left:83%;width:10%">México</span>
+      <span class="f" id="f-t1-ec"       style="top:70%;left:9%;width:18%"></span>
+      <span class="f" id="f-t1-par"      style="top:70%;left:34%;width:22%"></span>
+      <span class="f" id="f-t1-nacion"   style="top:70%;left:61%;width:25%">Mexicana</span>
+      <span class="f" id="f-t1-dom"      style="top:71.8%;left:9%;width:82%"></span>
+      <span class="f" id="f-t1-dom-loc"  style="top:73.5%;left:9%;width:20%"></span>
+      <span class="f" id="f-t1-dom-mun"  style="top:73.5%;left:32%;width:22%"></span>
+      <span class="f" id="f-t1-dom-ent"  style="top:73.5%;left:57%;width:23%"></span>
+
+      <!-- ══ TESTIGO 2 ══ -->
+      <span class="f" id="f-t2-curp"     style="top:75.5%;left:9%;width:40%"></span>
+      <span class="f" id="f-t2-tel"      style="top:75.5%;left:57%;width:30%"></span>
+      <span class="f" id="f-t2-nom"      style="top:77.2%;left:9%;width:82%"></span>
+      <span class="f" id="f-t2-fnac-dia" style="top:79%;left:18%;width:4%"></span>
+      <span class="f" id="f-t2-fnac-mes" style="top:79%;left:23%;width:4%"></span>
+      <span class="f" id="f-t2-fnac-ano" style="top:79%;left:28%;width:5%"></span>
+      <span class="f" id="f-t2-edad"     style="top:79%;left:44%;width:6%"></span>
+      <span class="f" id="f-t2-sexo"     style="top:79%;left:62%;width:15%"></span>
+      <span class="f" id="f-t2-local"    style="top:80.8%;left:9%;width:20%"></span>
+      <span class="f" id="f-t2-mun"      style="top:80.8%;left:32%;width:22%"></span>
+      <span class="f" id="f-t2-ent"      style="top:80.8%;left:57%;width:23%"></span>
+      <span class="f" id="f-t2-pais"     style="top:80.8%;left:83%;width:10%">México</span>
+      <span class="f" id="f-t2-ec"       style="top:82.5%;left:9%;width:18%"></span>
+      <span class="f" id="f-t2-par"      style="top:82.5%;left:34%;width:22%"></span>
+      <span class="f" id="f-t2-nacion"   style="top:82.5%;left:61%;width:25%">Mexicana</span>
+      <span class="f" id="f-t2-dom"      style="top:84.2%;left:9%;width:82%"></span>
+      <span class="f" id="f-t2-dom-loc"  style="top:86%;left:9%;width:20%"></span>
+      <span class="f" id="f-t2-dom-mun"  style="top:86%;left:32%;width:22%"></span>
+      <span class="f" id="f-t2-dom-ent"  style="top:86%;left:57%;width:23%"></span>
+
+      <!-- ══ DATOS DE LA FUNERARIA ══ -->
+      <span class="f" style="top:90%;left:20%;width:55%">FUNERARIA HUERTA</span>
+      <span class="f" style="top:90%;left:77%;width:20%">228-XXX-XXXX</span>
+      <span class="f" style="top:91.5%;left:9%;width:25%">XALAPA, VER.</span>
+      <span class="f" id="f-funerario"   style="top:93%;left:9%;width:70%"></span>
+
+    </div>
+  </div>
+
+</div><!-- /paginas -->
+
+<script>
+// ══════════════════════════════════════════
+//  UTILIDADES
+// ══════════════════════════════════════════
+function obtenerRegistros(){
+  try{ return JSON.parse(localStorage.getItem('defunciones_huerta')||'[]'); }
+  catch(e){ return []; }
+}
+
+function set(id, val){
+  const el = document.getElementById(id);
+  if(el && val !== undefined && val !== null) el.textContent = val;
+}
+
+function parseFecha(str){
+  // Devuelve {dia, mes, ano} desde "YYYY-MM-DD"
+  if(!str) return {dia:'',mes:'',ano:''};
+  const p = str.split('-');
+  return { dia: p[2]||'', mes: p[1]||'', ano: p[0]||'' };
+}
+
+function nombreCompleto(nombre){
+  // Si el nombre está en formato "Nombre Completo", separar en partes
+  // Retorna {nombres, ap1, ap2}
+  if(!nombre) return {nombres:'',ap1:'',ap2:''};
+  const partes = nombre.trim().split(' ');
+  if(partes.length === 1) return {nombres:partes[0], ap1:'', ap2:''};
+  if(partes.length === 2) return {nombres:partes[0], ap1:partes[1], ap2:''};
+  // 3+ palabras: último = ap2, penúltimo = ap1, el resto = nombres
+  const ap2 = partes.pop();
+  const ap1 = partes.pop();
+  return { nombres: partes.join(' '), ap1, ap2 };
+}
+
+function calcEdadDesde(fechaStr){
+  if(!fechaStr) return '';
+  const nac = new Date(fechaStr);
+  const hoy = new Date();
+  let edad = hoy.getFullYear() - nac.getFullYear();
+  const m = hoy.getMonth() - nac.getMonth();
+  if(m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) edad--;
+  return edad >= 0 ? String(edad) : '';
+}
+
+// ══════════════════════════════════════════
+//  LLENAR FORMATO
+// ══════════════════════════════════════════
+function llenarFormato(r){
+  if(!r) return;
+
+  // — Fecha del formato —
+  const ff = parseFecha(r.fechaFormato);
+  set('f-fecha-dia', ff.dia); set('f-fecha-mes', ff.mes); set('f-fecha-ano', ff.ano);
+
+  const fin = r.finado || {};
+
+  // — Finado: nombre —
+  const nom = nombreCompleto(fin.nombre);
+  set('f-nombres', nom.nombres); set('f-ap1', nom.ap1); set('f-ap2', nom.ap2);
+
+  // — CURP —
+  set('f-curp', fin.curp);
+
+  // — Sexo —
+  const sexo = fin.sexo || '';
+  set('f-sexo-h', sexo === 'H' ? 'X' : '');
+  set('f-sexo-m', sexo === 'M' ? 'X' : '');
+
+  // — Fecha de nacimiento y edad —
+  const fn = parseFecha(fin.fechaNacimiento);
+  set('f-fnac-dia', fn.dia); set('f-fnac-mes', fn.mes); set('f-fnac-ano', fn.ano);
+  set('f-edad', fin.edad || calcEdadDesde(fin.fechaNacimiento));
+  set('f-nacionalidad', fin.nacionalidad || 'Mexicana');
+
+  // — Lugar de nacimiento —
+  set('f-nac-local', fin.nacLocalidad);
+  set('f-nac-mun',   fin.nacMunicipio);
+  set('f-nac-ent',   fin.nacEstado);
+
+  // — Domicilio —
+  set('f-dom-calle', fin.domicilio);
+  set('f-dom-local', fin.domLocalidad);
+  set('f-dom-mun',   fin.domMunicipio);
+  set('f-dom-ent',   fin.domEstado);
+
+  // — Estado civil —
+  const ec = fin.estadoCivil || '';
+  set('f-ec-soltero', ec.includes('Soltero') || ec.includes('Viudo') || ec.includes('Divorciado') ? 'X' : '');
+  set('f-ec-casado',  ec.includes('Casado') || ec.includes('libre') ? 'X' : '');
+
+  // — Cónyuge —
+  if(fin.conyugue){
+    const c = fin.conyugue;
+    set('f-conyuge-nom', c.nombre);
+    const fc = parseFecha(c.fechaNacimiento);
+    set('f-conyuge-fnac-dia', fc.dia);
+    set('f-conyuge-fnac-mes', fc.mes);
+    set('f-conyuge-fnac-ano', fc.ano);
+    set('f-conyuge-local', c.localidad);
+    set('f-conyuge-mun',   c.municipio);
+    set('f-conyuge-ent',   c.estado);
+  }
+
+  // — Padre —
+  const padre = r.padre || {};
+  set('f-padre-nom', padre.nombre);
+  if(padre.estado === 'vivo'){
+    set('f-padre-local', padre.localidad);
+    set('f-padre-mun',   padre.municipio);
+    set('f-padre-ent',   padre.estado2);
+  } else {
+    set('f-padre-local', 'FINADO');
+  }
+
+  // — Madre —
+  const madre = r.madre || {};
+  set('f-madre-nom', madre.nombre);
+  if(madre.estado === 'vivo'){
+    set('f-madre-local', madre.localidad);
+    set('f-madre-mun',   madre.municipio);
+    set('f-madre-ent',   madre.estado2);
+  } else {
+    set('f-madre-local', 'FINADA');
+  }
+
+  // ══ DECLARANTE ══
+  const dec = r.declarante || {};
+  set('f-dec-nom',  dec.nombre);
+  set('f-dec-edad', calcEdadDesde(''));  // no tenemos fnac del declarante en captura actual
+  set('f-dec-par',  dec.parentesco);
+  set('f-dec-ec',   dec.estadoCivil);
+  set('f-dec-local', dec.localidad);
+  set('f-dec-mun',   dec.municipio);
+  set('f-dec-ent',   dec.estado);
+  set('f-dec-tel',   dec.telefono);
+
+  // ══ FALLECIMIENTO ══
+  const fall = r.fallecimiento || {};
+  const fd = parseFecha(fall.fecha);
+  set('f-def-dia', fd.dia); set('f-def-mes', fd.mes); set('f-def-ano', fd.ano);
+  set('f-def-hora',  fall.hora);
+  set('f-def-lugar', fall.nombreLugar || fall.lugar);
+  set('f-def-cert',  fall.numCertificado);
+
+  const dest = fall.destino || '';
+  set('f-dest-inhu', dest === 'Inhumación' ? 'X' : '');
+  set('f-dest-crem', dest === 'Cremación'  ? 'X' : '');
+  set('f-dest-tras', dest === 'Traslado'   ? fall.panteon : '');
+  set('f-panteon',   dest !== 'Traslado'   ? fall.panteon : '');
+  set('f-ubicacion', '');
+
+  // ══ TESTIGO 1 ══
+  const t1 = r.testigo1 || {};
+  set('f-t1-nom',  t1.nombre);
+  set('f-t1-ec',   t1.estadoCivil);
+  set('f-t1-par',  t1.parentesco);
+  set('f-t1-local',t1.localidad);
+  set('f-t1-mun',  t1.municipio);
+  set('f-t1-ent',  t1.estado);
+  set('f-t1-tel',  t1.telefono);
+
+  // ══ TESTIGO 2 ══
+  const t2 = r.testigo2 || {};
+  set('f-t2-nom',  t2.nombre);
+  set('f-t2-ec',   t2.estadoCivil);
+  set('f-t2-par',  t2.parentesco);
+  set('f-t2-local',t2.localidad);
+  set('f-t2-mun',  t2.municipio);
+  set('f-t2-ent',  t2.estado);
+  set('f-t2-tel',  t2.telefono);
+
+  // ══ FUNERARIO ══
+  set('f-funerario', 'Nombre del funerario: ________________');
+
+  // Actualizar barra
+  document.getElementById('folio-actual').textContent =
+    `Folio: ${r.folio || '—'} · ${fin.nombre || 'Sin nombre'}`;
+}
+
+// ══════════════════════════════════════════
+//  MODAL SELECTOR
+// ══════════════════════════════════════════
+function abrirSelector(){
+  const lista = document.getElementById('modal-lista');
+  const regs = obtenerRegistros().slice().reverse();
+  if(regs.length === 0){
+    lista.innerHTML = '<div class="modal-vacio">No hay registros guardados.<br>Usa el Formato para Certificar primero.</div>';
+  } else {
+    lista.innerHTML = regs.map(r => `
+      <div class="modal-item" onclick="seleccionarRegistro(${r.id})">
+        <div class="modal-folio">Folio: ${r.folio || '—'}</div>
+        <div class="modal-nombre">${r.finado?.nombre || 'Sin nombre'}</div>
+        <div class="modal-fecha">Defunción: ${r.fallecimiento?.fecha || '—'}</div>
+      </div>
+    `).join('');
+  }
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function cerrarSelector(){
+  document.getElementById('modal').style.display = 'none';
+}
+
+function seleccionarRegistro(id){
+  const r = obtenerRegistros().find(x => x.id === id);
+  if(r){ llenarFormato(r); }
+  cerrarSelector();
+}
+
+// ══════════════════════════════════════════
+//  INICIO: cargar último registro automáticamente
+// ══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', ()=>{
+  const regs = obtenerRegistros();
+  if(regs.length > 0){
+    llenarFormato(regs[regs.length - 1]);
+  } else {
+    // Mostrar selector automáticamente si no hay datos
+    // abrirSelector(); // Comentado para no asustar si es primera vez
+  }
+});
+</script>
+</body>
+</html>
