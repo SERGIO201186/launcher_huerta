@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f172a">
+<title>Capturador — Funeraria Huerta</title>
+<style>
+:root{
+  --azul:#0f172a; --panel:#16213a; --borde:#27324d; --input:#1e2d45;
+  --dorado:#c9a24b; --dorado-s:#e3c878; --hueso:#f4f1ea;
+  --gris:#9aa5b8; --verde:#3ba776; --rojo:#d8553f;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--azul);color:var(--hueso);font-family:'Helvetica Neue',Arial,sans-serif;min-height:100vh;padding-bottom:80px;}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--panel);border-bottom:1px solid var(--borde);padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;}
+.marca{display:flex;align-items:center;gap:10px;}
+.sello{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--dorado);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;color:var(--dorado-s);font-family:'Times New Roman',serif;flex-shrink:0;}
+.topbar h1{font-size:14px;font-weight:600;letter-spacing:0.03em;}
+.topbar p{font-size:10px;color:var(--dorado-s);letter-spacing:0.08em;text-transform:uppercase;}
+.btn-back{background:none;border:1px solid var(--borde);color:var(--gris);
+  padding:7px 13px;border-radius:7px;font-size:12px;cursor:pointer;}
+
+/* ── TABS ── */
+.tabs{display:flex;background:var(--panel);border-bottom:1px solid var(--borde);
+  padding:0 14px;gap:2px;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:10px 14px;font-size:11.5px;letter-spacing:0.05em;text-transform:uppercase;
+  color:var(--gris);border:none;background:none;cursor:pointer;
+  border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;}
+.tab.on{color:var(--dorado-s);border-bottom-color:var(--dorado);}
+
+/* ── ESTADO BADGE ── */
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;
+  font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-left:8px;}
+.badge-borrador{background:rgba(232,184,75,0.15);color:var(--dorado-s);border:1px solid rgba(201,162,75,0.3);}
+.badge-archivado{background:rgba(59,167,118,0.15);color:var(--verde);border:1px solid rgba(59,167,118,0.3);}
+
+/* ── CONTENIDO ── */
+.cont{padding:16px;max-width:800px;margin:0 auto;}
+.sec{display:none;}
+.sec.on{display:block;}
+
+/* ── ZONA DE CARGA ── */
+.zona-carga{
+  border:2px dashed var(--borde);border-radius:14px;
+  padding:40px 20px;text-align:center;cursor:pointer;
+  transition:border-color .2s,background .2s;margin-bottom:16px;
+}
+.zona-carga:hover,.zona-carga.drag{border-color:var(--dorado);background:rgba(201,162,75,0.05);}
+.zona-carga input[type=file]{display:none;}
+.zona-icono{font-size:40px;margin-bottom:12px;opacity:0.7;}
+.zona-titulo{font-size:15px;font-weight:600;color:var(--hueso);margin-bottom:6px;}
+.zona-sub{font-size:12px;color:var(--gris);}
+
+/* ── GRUPO ── */
+.grupo{background:var(--panel);border:1px solid var(--borde);border-radius:12px;
+  padding:16px;margin-bottom:14px;}
+.gtit{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--dorado-s);
+  margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.gtit::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--dorado);flex-shrink:0;}
+
+/* ── CAMPOS ── */
+.campo{margin-bottom:12px;}
+.campo:last-child{margin-bottom:0;}
+.campo label{display:block;font-size:11px;color:var(--gris);letter-spacing:0.05em;
+  text-transform:uppercase;margin-bottom:4px;}
+.campo label .req{color:var(--dorado);margin-left:2px;}
+input[type=text],input[type=date],input[type=time],input[type=number],
+input[type=tel],select,textarea{
+  width:100%;background:var(--input);border:1px solid var(--borde);border-radius:8px;
+  color:var(--hueso);font-size:14px;padding:10px 12px;outline:none;
+  transition:border-color .15s;-webkit-appearance:none;appearance:none;
+  font-family:'Helvetica Neue',Arial,sans-serif;}
+input:focus,select:focus,textarea:focus{border-color:var(--dorado);}
+input.editado{border-color:var(--dorado-s)!important;background:rgba(201,162,75,0.07)!important;}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239aa5b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+textarea{resize:vertical;min-height:66px;}
+.fila2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fila3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+@media(max-width:520px){.fila2,.fila3{grid-template-columns:1fr;}}
+
+/* ── CAUSAS ── */
+.causa{background:rgba(255,255,255,0.03);border:1px solid var(--borde);
+  border-radius:9px;padding:12px;margin-bottom:10px;}
+.causa-num{font-size:10px;color:var(--dorado-s);letter-spacing:0.08em;
+  text-transform:uppercase;margin-bottom:8px;font-weight:600;}
+.causa-grid{display:grid;grid-template-columns:1fr 80px 110px;gap:8px;align-items:end;}
+@media(max-width:520px){.causa-grid{grid-template-columns:1fr;}}
+
+/* ── TOGGLE VIVO/FINADO ── */
+.toggle-par{display:flex;gap:8px;margin-bottom:10px;}
+.tbtn{flex:1;padding:8px;border-radius:8px;border:1px solid var(--borde);
+  background:none;color:var(--gris);font-size:12px;cursor:pointer;transition:all .15s;}
+.tbtn.verde{background:rgba(59,167,118,0.15);border-color:var(--verde);color:var(--verde);}
+.tbtn.rojo{background:rgba(216,85,63,0.15);border-color:var(--rojo);color:var(--rojo);}
+
+/* ── CHIPS ── */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+.chip{padding:6px 12px;border-radius:20px;border:1px solid var(--borde);
+  background:none;color:var(--gris);font-size:12px;cursor:pointer;transition:all .15s;}
+.chip.on{background:rgba(201,162,75,0.15);border-color:var(--dorado);color:var(--dorado-s);}
+
+/* ── LISTA ARCHIVADOS ── */
+.reg-card{background:var(--panel);border:1px solid var(--borde);border-radius:10px;
+  padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:border-color .15s;}
+.reg-card:active{border-color:var(--dorado);}
+.rc-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.rc-folio{font-size:11px;color:var(--dorado-s);letter-spacing:0.06em;text-transform:uppercase;}
+.rc-nombre{font-size:15px;font-weight:600;margin-top:2px;}
+.rc-fecha{font-size:11px;color:var(--gris);margin-top:3px;}
+.rc-btns{display:flex;gap:6px;margin-top:10px;}
+.rc-btn{padding:6px 12px;border-radius:7px;border:1px solid var(--borde);
+  background:none;color:var(--gris);font-size:11px;cursor:pointer;letter-spacing:0.03em;}
+.rc-btn.prim{border-color:var(--dorado);color:var(--dorado-s);}
+.rc-btn.danger{border-color:rgba(216,85,63,0.4);color:var(--rojo);}
+.vacio{text-align:center;padding:40px 20px;color:var(--gris);font-size:13px;line-height:1.8;}
+.vacio-i{font-size:36px;margin-bottom:10px;opacity:0.5;}
+
+/* ── DIFF INDICATOR ── */
+.diff-bar{background:rgba(232,184,75,0.1);border:1px solid rgba(201,162,75,0.2);
+  border-radius:9px;padding:10px 14px;margin-bottom:14px;font-size:12px;
+  color:var(--dorado-s);display:none;}
+.diff-bar.show{display:block;}
+
+/* ── ACCIONES FIJAS ── */
+.acciones{position:fixed;bottom:0;left:0;right:0;background:var(--panel);
+  border-top:1px solid var(--borde);padding:10px 14px;display:flex;gap:10px;z-index:100;}
+.btn-archivar{flex:1;background:var(--verde);color:#fff;border:none;border-radius:10px;
+  padding:13px;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:0.04em;}
+.btn-archivar:active{opacity:0.85;}
+.btn-sec{background:none;border:1px solid var(--borde);color:var(--gris);
+  border-radius:10px;padding:13px 16px;font-size:12px;cursor:pointer;}
+.btn-sec:active{background:rgba(255,255,255,0.05);}
+#acc-lista{display:none;}
+
+/* ── TOAST ── */
+.toast{position:fixed;top:68px;left:50%;transform:translateX(-50%);
+  background:var(--verde);color:#fff;padding:9px 20px;border-radius:20px;
+  font-size:13px;font-weight:600;z-index:999;opacity:0;transition:opacity .3s;
+  pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+.toast.err{background:var(--rojo);}
+
+/* ── INDICADOR CAMBIOS ── */
+.dot-edit{width:7px;height:7px;border-radius:50%;background:var(--dorado);
+  display:inline-block;margin-left:5px;vertical-align:middle;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="marca">
+    <div class="sello">H</div>
+    <div>
+      <h1>Capturador de Defunción</h1>
+      <p>Funeraria Huerta · Xalapa, Ver.</p>
+    </div>
+  </div>
+  <button class="btn-back" onclick="window.location.href='index.html'">← Inicio</button>
+</div>
+
+<div class="tabs">
+  <button class="tab on" onclick="irTab('editar',this)">✏️ Editar</button>
+  <button class="tab" onclick="irTab('archivados',this)">📁 Archivados</button>
+</div>
+
+<!-- ═══════════ SECCIÓN EDITAR ═══════════ -->
+<div class="sec on cont" id="sec-editar">
+
+  <!-- Zona de carga JSON -->
+  <div class="zona-carga" id="zona" onclick="document.getElementById('file-json').click()"
+    ondragover="event.preventDefault();this.classList.add('drag')"
+    ondragleave="this.classList.remove('drag')"
+    ondrop="onDrop(event)">
+    <input type="file" id="file-json" accept=".json" onchange="cargarJSON(this.files[0])">
+    <div class="zona-icono">📤</div>
+    <div class="zona-titulo">Importar JSON del mapeador</div>
+    <div class="zona-sub">Toca aquí o arrastra el archivo .json exportado del mapeador</div>
+  </div>
+
+  <!-- Indicador de cambios -->
+  <div class="diff-bar" id="diff-bar">
+    ⚠️ Hay campos editados respecto al JSON original. Archiva para guardar los cambios.
+  </div>
+
+  <!-- Encabezado del registro cargado -->
+  <div class="grupo" id="bloque-encabezado" style="display:none;">
+    <div class="gtit">Registro cargado</div>
+    <div class="fila2">
+      <div class="campo">
+        <label>No. Folio ODS</label>
+        <input type="text" id="c-folio" oninput="marcarEdit(this)">
+      </div>
+      <div class="campo">
+        <label>Fecha del formato</label>
+        <input type="date" id="c-fecha-formato" oninput="marcarEdit(this)">
+      </div>
+    </div>
+    <div class="campo">
+      <label>Estado</label>
+      <span id="badge-estado" class="badge badge-borrador">Borrador</span>
+    </div>
+  </div>
+
+  <!-- FINADO -->
+  <div class="grupo" id="bloque-finado" style="display:none;">
+    <div class="gtit">Datos del finado</div>
+    <div class="campo">
+      <label>Nombre completo <span class="req">*</span></label>
+      <input type="text" id="c-nombre" oninput="marcarEdit(this)">
+    </div>
+    <div class="fila2">
+      <div class="campo"><label>CURP</label><input type="text" id="c-curp" oninput="marcarEdit(this)" style="text-transform:uppercase"></div>
+      <div class="campo">
+        <label>Sexo</label>
+        <select id="c-sexo" onchange="marcarEdit(this)">
+          <option value="">—</option><option value="H">Hombre</option><option value="M">Mujer</option>
+        </select>
+      </div>
+    </div>
+    <div class="fila2">
+      <div class="campo">
+        <label>Estado civil</label>
+        <select id="c-ec" onchange="marcarEdit(this);toggleConyugue()">
+          <option value="">—</option>
+          <option>Soltero(a)</option><option>Casado(a)</option>
+          <option>Viudo(a)</option><option>Divorciado(a)</option><option>Unión libre</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label>Fecha de nacimiento</label>
+        <input type="date" id="c-fnac" oninput="marcarEdit(this);calcEdad()">
+      </div>
+    </div>
+    <div class="fila2">
+      <div class="campo"><label>Edad (calculada)</label><input type="text" id="c-edad" readonly style="color:var(--dorado-s);font-weight:600;"></div>
+      <div class="campo"><label>Nacionalidad</label><input type="text" id="c-nacion" oninput="marcarEdit(this)"></div>
+    </div>
+    <div class="campo"><label>Lugar de nacimiento</label>
+      <div class="fila3">
+        <input type="text" id="c-nac-local" placeholder="Localidad" oninput="marcarEdit(this)">
+        <input type="text" id="c-nac-mun" placeholder="Municipio" oninput="marcarEdit(this)">
+        <input type="text" id="c-nac-est" placeholder="Estado" oninput="marcarEdit(this)">
+      </div>
+    </div>
+    <div class="campo"><label>Domicilio habitual</label>
+      <input type="text" id="c-dom" placeholder="Calle, No. y Colonia" oninput="marcarEdit(this)" style="margin-bottom:8px;">
+      <div class="fila3">
+        <input type="text" id="c-dom-local" placeholder="Localidad" oninput="marcarEdit(this)">
+        <input type="text" id="c-dom-mun" placeholder="Municipio" oninput="marcarEdit(this)">
+        <input type="text" id="c-dom-est" placeholder="Estado" oninput="marcarEdit(this)">
+      </div>
+    </div>
+    <div class="campo"><label>Escolaridad</label>
+      <select id="c-escolaridad" onchange="marcarEdit(this)">
+        <option value="">—</option>
+        <option>Sin escolaridad</option><option>Primaria incompleta</option>
+        <option>Primaria completa</option><option>Secundaria o equivalente</option>
+        <option>Preparatoria o equivalente</option><option>Profesional</option>
+      </select>
+    </div>
+    <div class="campo"><label>Ocupación habitual</label>
+      <select id="c-ocupacion" onchange="marcarEdit(this)">
+        <option value="">—</option>
+        <option>Obrero</option><option>Empleado</option><option>Jornalero o peón</option>
+        <option>Trabajador por su cuenta</option><option>Patrón o empresario</option>
+        <option>Trabajador no remunerado</option><option>Labores domésticas</option>
+        <option>Estudiante</option><option>Jubilado o pensionado</option>
+        <option>Incapacitado</option><option>Otro</option>
+      </select>
+    </div>
+    <div class="campo"><label>Afiliación a salud</label>
+      <div class="chips" id="chips-salud">
+        <button class="chip" onclick="toggleChip(this)">IMSS</button>
+        <button class="chip" onclick="toggleChip(this)">ISSSTE</button>
+        <button class="chip" onclick="toggleChip(this)">SEDENA</button>
+        <button class="chip" onclick="toggleChip(this)">SEMAR</button>
+        <button class="chip" onclick="toggleChip(this)">PEMEX</button>
+        <button class="chip" onclick="toggleChip(this)">Seguro Popular</button>
+        <button class="chip" onclick="toggleChip(this)">BIENESTAR</button>
+        <button class="chip" onclick="toggleChip(this)">Ninguna</button>
+      </div>
+    </div>
+
+    <!-- Cónyuge -->
+    <div id="bloque-conyuge" style="display:none;margin-top:12px;background:rgba(201,162,75,0.05);border:1px solid rgba(201,162,75,0.2);border-radius:9px;padding:12px;">
+      <div style="font-size:11px;color:var(--dorado-s);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">Cónyuge</div>
+      <div class="campo"><label>Nombre</label><input type="text" id="c-cony-nom" oninput="marcarEdit(this)"></div>
+      <div class="campo"><label>Fecha de nacimiento</label><input type="date" id="c-cony-fnac" oninput="marcarEdit(this)"></div>
+      <div class="campo"><label>Lugar de nacimiento</label>
+        <div class="fila3">
+          <input type="text" id="c-cony-local" placeholder="Localidad" oninput="marcarEdit(this)">
+          <input type="text" id="c-cony-mun" placeholder="Municipio" oninput="marcarEdit(this)">
+          <input type="text" id="c-cony-est" placeholder="Estado" oninput="marcarEdit(this)">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PADRES -->
+  <div class="grupo" id="bloque-padres" style="display:none;">
+    <div class="gtit">Datos del padre</div>
+    <div class="campo"><label>Nombre</label><input type="text" id="c-padre-nom" oninput="marcarEdit(this)"></div>
+    <div class="toggle-par">
+      <button class="tbtn verde" id="btn-padre-v" onclick="setPadre('vivo')">✓ Vive</button>
+      <button class="tbtn" id="btn-padre-f" onclick="setPadre('finado')">✗ Finado</button>
+    </div>
+    <div id="padre-nac">
+      <div class="fila3">
+        <div class="campo"><label>Localidad</label><input type="text" id="c-padre-local" oninput="marcarEdit(this)"></div>
+        <div class="campo"><label>Municipio</label><input type="text" id="c-padre-mun" oninput="marcarEdit(this)"></div>
+        <div class="campo"><label>Estado</label><input type="text" id="c-padre-est" oninput="marcarEdit(this)"></div>
+      </div>
+    </div>
+
+    <div class="gtit" style="margin-top:16px;">Datos de la madre</div>
+    <div class="campo"><label>Nombre</label><input type="text" id="c-madre-nom" oninput="marcarEdit(this)"></div>
+    <div class="toggle-par">
+      <button class="tbtn verde" id="btn-madre-v" onclick="setMadre('vivo')">✓ Vive</button>
+      <button class="tbtn" id="btn-madre-f" onclick="setMadre('finado')">✗ Finada</button>
+    </div>
+    <div id="madre-nac">
+      <div class="fila3">
+        <div class="campo"><label>Localidad</label><input type="text" id="c-madre-local" oninput="marcarEdit(this)"></div>
+        <div class="campo"><label>Municipio</label><input type="text" id="c-madre-mun" oninput="marcarEdit(this)"></div>
+        <div class="campo"><label>Estado</label><input type="text" id="c-madre-est" oninput="marcarEdit(this)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FALLECIMIENTO -->
+  <div class="grupo" id="bloque-fall" style="display:none;">
+    <div class="gtit">Datos del fallecimiento</div>
+    <div class="fila2">
+      <div class="campo"><label>Fecha</label><input type="date" id="c-def-fecha" oninput="marcarEdit(this)"></div>
+      <div class="campo"><label>Hora</label><input type="time" id="c-def-hora" oninput="marcarEdit(this)"></div>
+    </div>
+    <div class="campo"><label>Lugar</label>
+      <select id="c-def-lugar" onchange="marcarEdit(this)">
+        <option value="">—</option><option>Hogar</option><option>Hospital o clínica</option>
+        <option>Vía pública</option><option>Otro lugar</option>
+      </select>
+    </div>
+    <div class="campo"><label>Nombre del lugar / Hospital</label><input type="text" id="c-def-nom-lugar" oninput="marcarEdit(this)"></div>
+    <div class="campo"><label>No. de Certificado</label><input type="text" id="c-def-cert" oninput="marcarEdit(this)"></div>
+    <div class="campo"><label>Destino del cadáver</label>
+      <select id="c-destino" onchange="marcarEdit(this)">
+        <option value="">—</option><option>Inhumación</option>
+        <option>Cremación</option><option>Traslado</option>
+      </select>
+    </div>
+    <div class="campo"><label>Panteón / Lugar</label><input type="text" id="c-panteon" oninput="marcarEdit(this)"></div>
+
+    <!-- Causas -->
+    <div class="gtit" style="margin-top:16px;">Causas de defunción</div>
+    <div id="c-causas-lista"></div>
+  </div>
+
+  <!-- DECLARANTE -->
+  <div class="grupo" id="bloque-dec" style="display:none;">
+    <div class="gtit">Declarante</div>
+    <div id="bloque-dec-campos"></div>
+  </div>
+
+  <!-- TESTIGOS -->
+  <div class="grupo" id="bloque-t1" style="display:none;">
+    <div class="gtit">Testigo 1</div>
+    <div id="bloque-t1-campos"></div>
+  </div>
+  <div class="grupo" id="bloque-t2" style="display:none;">
+    <div class="gtit">Testigo 2</div>
+    <div id="bloque-t2-campos"></div>
+  </div>
+
+  <!-- NOTAS -->
+  <div class="grupo" id="bloque-notas" style="display:none;">
+    <div class="gtit">Notas internas</div>
+    <div class="campo">
+      <label>Observaciones (no se imprimen)</label>
+      <textarea id="c-notas" rows="4" placeholder="Anotaciones del servicio, correcciones, pendientes..." oninput="marcarEdit(this)"></textarea>
+    </div>
+    <div class="campo">
+      <label>Funerario que asiste</label>
+      <input type="text" id="c-funerario" oninput="marcarEdit(this)" placeholder="Nombre del empleado">
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════ SECCIÓN ARCHIVADOS ═══════════ -->
+<div class="sec cont" id="sec-archivados">
+  <div class="grupo">
+    <div class="gtit">Registros archivados</div>
+    <div id="lista-archivados"></div>
+  </div>
+</div>
+
+<!-- Acciones editar -->
+<div class="acciones" id="acc-editar">
+  <button class="btn-sec" onclick="limpiarTodo()">🗑 Limpiar</button>
+  <button class="btn-sec" onclick="exportarJSONEditado()" id="btn-exportar-edit" style="display:none">📤 Exportar</button>
+  <button class="btn-archivar" onclick="archivar()" id="btn-archivar" style="display:none">✅ Archivar registro</button>
+</div>
+<div class="acciones" id="acc-lista" style="display:none;">
+  <button class="btn-sec" style="flex:1" onclick="irTab('editar',document.querySelector('.tab'))">+ Importar nuevo JSON</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════
+//  ESTADO
+// ═══════════════════════════════════
+let datosCargados = null;    // JSON original importado
+let padreEst = 'vivo';
+let madreEst = 'vivo';
+let hayEdiciones = false;
+
+const PARENTESCOS = ['Padre','Madre','Hijo','Hija','Abuelo','Abuela','Tío','Tía','Primo','Prima','Sobrino','Sobrina','Nieto','Nieta','Cónyuge','Ninguno'];
+const ECS = ['Soltero(a)','Casado(a)','Viudo(a)','Divorciado(a)','Unión libre'];
+const UNIDADES = ['Minutos','Horas','Días','Semanas','Meses','Años'];
+
+// ═══════════════════════════════════
+//  INIT
+// ═══════════════════════════════════
+document.addEventListener('DOMContentLoaded', ()=>{
+  construirPersona('bloque-dec-campos','dec');
+  construirPersona('bloque-t1-campos','t1');
+  construirPersona('bloque-t2-campos','t2');
+  renderArchivados();
+});
+
+// ═══════════════════════════════════
+//  TABS
+// ═══════════════════════════════════
+function irTab(id, btn){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('sec-'+id).classList.add('on');
+  btn.classList.add('on');
+  document.getElementById('acc-editar').style.display = id==='editar'?'flex':'none';
+  document.getElementById('acc-lista').style.display  = id==='archivados'?'flex':'none';
+  if(id==='archivados') renderArchivados();
+}
+
+// ═══════════════════════════════════
+//  CARGAR JSON
+// ═══════════════════════════════════
+function onDrop(e){
+  e.preventDefault();
+  document.getElementById('zona').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if(file) cargarJSON(file);
+}
+
+function cargarJSON(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const datos = JSON.parse(e.target.result);
+      datosCargados = datos;
+      llenarFormulario(datos);
+      toast('✓ JSON cargado correctamente');
+    } catch(err){
+      toast('Error al leer el JSON — verifica el archivo','err');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ═══════════════════════════════════
+//  LLENAR FORMULARIO DESDE DATOS
+// ═══════════════════════════════════
+function llenarFormulario(d){
+  const s = (id,v) => { const el=document.getElementById(id); if(el && v!=null) el.value=v; };
+  const f = d.finado || {};
+  const fall = d.fallecimiento || {};
+
+  s('c-folio', d.folio);
+  s('c-fecha-formato', d.fechaFormato);
+
+  // Finado
+  s('c-nombre', f.nombre);
+  s('c-curp',   f.curp);
+  s('c-sexo',   f.sexo);
+  s('c-ec',     f.estadoCivil);
+  s('c-fnac',   f.fechaNacimiento);
+  s('c-nacion', f.nacionalidad || 'Mexicana');
+  s('c-nac-local', f.nacLocalidad);
+  s('c-nac-mun',   f.nacMunicipio);
+  s('c-nac-est',   f.nacEstado);
+  s('c-dom',       f.domicilio);
+  s('c-dom-local', f.domLocalidad);
+  s('c-dom-mun',   f.domMunicipio);
+  s('c-dom-est',   f.domEstado);
+  s('c-escolaridad', f.escolaridad);
+  s('c-ocupacion',   f.ocupacion);
+  calcEdad();
+  toggleConyugue();
+
+  // Chips salud
+  document.querySelectorAll('#chips-salud .chip').forEach(c=>{
+    c.classList.toggle('on', (f.saludAfiliacion||[]).includes(c.textContent));
+  });
+
+  // Cónyuge
+  if(f.conyugue){
+    s('c-cony-nom',   f.conyugue.nombre);
+    s('c-cony-fnac',  f.conyugue.fechaNacimiento);
+    s('c-cony-local', f.conyugue.localidad);
+    s('c-cony-mun',   f.conyugue.municipio);
+    s('c-cony-est',   f.conyugue.estado);
+  }
+
+  // Padre
+  s('c-padre-nom',   d.padre?.nombre);
+  setPadre(d.padre?.estado || 'vivo');
+  s('c-padre-local', d.padre?.localidad);
+  s('c-padre-mun',   d.padre?.municipio);
+  s('c-padre-est',   d.padre?.estado2);
+
+  // Madre
+  s('c-madre-nom',   d.madre?.nombre);
+  setMadre(d.madre?.estado || 'vivo');
+  s('c-madre-local', d.madre?.localidad);
+  s('c-madre-mun',   d.madre?.municipio);
+  s('c-madre-est',   d.madre?.estado2);
+
+  // Fallecimiento
+  s('c-def-fecha',    fall.fecha);
+  s('c-def-hora',     fall.hora);
+  s('c-def-lugar',    fall.lugar);
+  s('c-def-nom-lugar',fall.nombreLugar);
+  s('c-def-cert',     fall.numCertificado);
+  s('c-destino',      fall.destino);
+  s('c-panteon',      fall.panteon);
+
+  // Causas
+  const causasEl = document.getElementById('c-causas-lista');
+  causasEl.innerHTML = '';
+  (d.causas || []).forEach((c,i)=>{
+    const div = document.createElement('div');
+    div.className = 'causa';
+    div.innerHTML = `
+      <div class="causa-num">Causa ${i+1}</div>
+      <div class="campo"><label>Descripción</label>
+        <input type="text" value="${c.descripcion||''}" oninput="marcarEdit(this)" data-causa="${i}" data-campo="descripcion">
+      </div>
+      <div class="causa-grid">
+        <div class="campo"><label>Intervalo</label>
+          <input type="number" min="0" value="${c.intervalo||''}" oninput="marcarEdit(this)" data-causa="${i}" data-campo="intervalo">
+        </div>
+        <div class="campo"><label>Unidad</label>
+          <select onchange="marcarEdit(this)" data-causa="${i}" data-campo="unidad">
+            <option value="">—</option>
+            ${UNIDADES.map(u=>`<option${c.unidad===u?' selected':''}>${u}</option>`).join('')}
+          </select>
+        </div>
+        <div></div>
+      </div>`;
+    causasEl.appendChild(div);
+  });
+
+  // Declarante y testigos
+  cargarPersona('dec', d.declarante);
+  cargarPersona('t1',  d.testigo1);
+  cargarPersona('t2',  d.testigo2);
+
+  // Notas
+  s('c-notas',     d.notasInternas || '');
+  s('c-funerario', d.funerario || '');
+
+  // Badge estado
+  const badge = document.getElementById('badge-estado');
+  badge.className = 'badge ' + (d._archivado ? 'badge-archivado' : 'badge-borrador');
+  badge.textContent = d._archivado ? 'Archivado' : 'Borrador';
+
+  // Mostrar bloques
+  ['encabezado','finado','padres','fall','dec','t1','t2','notas'].forEach(b=>{
+    const el = document.getElementById('bloque-'+b);
+    if(el) el.style.display = 'block';
+  });
+
+  // Ocultar zona de carga, mostrar botones
+  document.getElementById('zona').style.display = 'none';
+  document.getElementById('btn-archivar').style.display = 'inline-block';
+  document.getElementById('btn-exportar-edit').style.display = 'inline-block';
+
+  hayEdiciones = false;
+  document.getElementById('diff-bar').classList.remove('show');
+}
+
+// ═══════════════════════════════════
+//  PERSONAS (declarante/testigos)
+// ═══════════════════════════════════
+function construirPersona(contenedor, pref){
+  document.getElementById(contenedor).innerHTML = `
+    <div class="campo"><label>Nombre completo</label>
+      <input type="text" id="c-${pref}-nom" oninput="marcarEdit(this)">
+    </div>
+    <div class="fila2">
+      <div class="campo"><label>Parentesco</label>
+        <select id="c-${pref}-par" onchange="marcarEdit(this)">
+          <option value="">—</option>${PARENTESCOS.map(p=>`<option>${p}</option>`).join('')}
+        </select>
+      </div>
+      <div class="campo"><label>Estado civil</label>
+        <select id="c-${pref}-ec" onchange="marcarEdit(this)">
+          <option value="">—</option>${ECS.map(e=>`<option>${e}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="campo"><label>Lugar de nacimiento</label>
+      <div class="fila3">
+        <input type="text" id="c-${pref}-local" placeholder="Localidad" oninput="marcarEdit(this)">
+        <input type="text" id="c-${pref}-mun"   placeholder="Municipio" oninput="marcarEdit(this)">
+        <input type="text" id="c-${pref}-est"   placeholder="Estado" oninput="marcarEdit(this)">
+      </div>
+    </div>
+    <div class="campo"><label>Teléfono</label>
+      <input type="tel" id="c-${pref}-tel" oninput="marcarEdit(this)">
+    </div>`;
+}
+
+function cargarPersona(pref, obj){
+  if(!obj) return;
+  const s = (id,v) => { const el=document.getElementById(id); if(el && v!=null) el.value=v; };
+  s(`c-${pref}-nom`,   obj.nombre);
+  s(`c-${pref}-par`,   obj.parentesco);
+  s(`c-${pref}-ec`,    obj.estadoCivil);
+  s(`c-${pref}-local`, obj.localidad);
+  s(`c-${pref}-mun`,   obj.municipio);
+  s(`c-${pref}-est`,   obj.estado);
+  s(`c-${pref}-tel`,   obj.telefono);
+}
+
+// ═══════════════════════════════════
+//  INTERACCIONES
+// ═══════════════════════════════════
+function toggleConyugue(){
+  const ec = document.getElementById('c-ec')?.value || '';
+  document.getElementById('bloque-conyuge').style.display = ec === 'Casado(a)' ? 'block' : 'none';
+}
+function setPadre(est){
+  padreEst = est;
+  document.getElementById('btn-padre-v').className = 'tbtn'+(est==='vivo'?' verde':'');
+  document.getElementById('btn-padre-f').className = 'tbtn'+(est==='finado'?' rojo':'');
+  document.getElementById('padre-nac').style.display = est==='vivo'?'block':'none';
+}
+function setMadre(est){
+  madreEst = est;
+  document.getElementById('btn-madre-v').className = 'tbtn'+(est==='vivo'?' verde':'');
+  document.getElementById('btn-madre-f').className = 'tbtn'+(est==='finado'?' rojo':'');
+  document.getElementById('madre-nac').style.display = est==='vivo'?'block':'none';
+}
+function toggleChip(btn){
+  if(btn.textContent==='Ninguna'){
+    document.querySelectorAll('#chips-salud .chip').forEach(c=>c.classList.remove('on'));
+  } else {
+    document.querySelector('#chips-salud .chip:last-child')?.classList.remove('on');
+  }
+  btn.classList.toggle('on');
+  marcarEditGlobal();
+}
+function calcEdad(){
+  const v = document.getElementById('c-fnac')?.value;
+  if(!v){ document.getElementById('c-edad').value=''; return; }
+  const nac=new Date(v), hoy=new Date();
+  let e = hoy.getFullYear()-nac.getFullYear();
+  if(hoy.getMonth()-nac.getMonth()<0||(hoy.getMonth()-nac.getMonth()===0&&hoy.getDate()<nac.getDate())) e--;
+  document.getElementById('c-edad').value = e>=0?e:'';
+}
+
+// ═══════════════════════════════════
+//  MARCAR EDICIONES
+// ═══════════════════════════════════
+function marcarEdit(el){
+  el.classList.add('editado');
+  marcarEditGlobal();
+}
+function marcarEditGlobal(){
+  hayEdiciones = true;
+  document.getElementById('diff-bar').classList.add('show');
+}
+
+// ═══════════════════════════════════
+//  RECOLECTAR DATOS EDITADOS
+// ═══════════════════════════════════
+function recolectar(){
+  const g = id => document.getElementById(id)?.value || '';
+  const chips = () => Array.from(document.querySelectorAll('#chips-salud .chip.on')).map(c=>c.textContent);
+
+  // Causas desde DOM
+  const causas = [];
+  document.querySelectorAll('#c-causas-lista .causa').forEach((blq,i)=>{
+    const inputs = blq.querySelectorAll('input,select');
+    causas.push({
+      descripcion: inputs[0]?.value || '',
+      intervalo:   inputs[1]?.value || '',
+      unidad:      inputs[2]?.value || '',
+    });
+  });
+
+  return {
+    ...(datosCargados || {}),
+    id: datosCargados?.id || Date.now(),
+    folio: g('c-folio'),
+    fechaFormato: g('c-fecha-formato'),
+    fechaArchivado: new Date().toISOString(),
+    _archivado: true,
+    finado:{
+      nombre: g('c-nombre'), curp: g('c-curp'), sexo: g('c-sexo'),
+      estadoCivil: g('c-ec'), fechaNacimiento: g('c-fnac'),
+      edad: g('c-edad'), nacionalidad: g('c-nacion'),
+      nacLocalidad: g('c-nac-local'), nacMunicipio: g('c-nac-mun'), nacEstado: g('c-nac-est'),
+      domicilio: g('c-dom'), domLocalidad: g('c-dom-local'),
+      domMunicipio: g('c-dom-mun'), domEstado: g('c-dom-est'),
+      escolaridad: g('c-escolaridad'), ocupacion: g('c-ocupacion'),
+      saludAfiliacion: chips(),
+      conyugue: g('c-ec')==='Casado(a)' ? {
+        nombre: g('c-cony-nom'), fechaNacimiento: g('c-cony-fnac'),
+        localidad: g('c-cony-local'), municipio: g('c-cony-mun'), estado: g('c-cony-est'),
+      } : null,
+    },
+    fallecimiento:{
+      fecha: g('c-def-fecha'), hora: g('c-def-hora'),
+      lugar: g('c-def-lugar'), nombreLugar: g('c-def-nom-lugar'),
+      numCertificado: g('c-def-cert'), destino: g('c-destino'), panteon: g('c-panteon'),
+    },
+    causas,
+    padre:{ nombre: g('c-padre-nom'), estado: padreEst,
+      localidad: g('c-padre-local'), municipio: g('c-padre-mun'), estado2: g('c-padre-est') },
+    madre:{ nombre: g('c-madre-nom'), estado: madreEst,
+      localidad: g('c-madre-local'), municipio: g('c-madre-mun'), estado2: g('c-madre-est') },
+    declarante:{ nombre: g('c-dec-nom'), parentesco: g('c-dec-par'),
+      estadoCivil: g('c-dec-ec'), localidad: g('c-dec-local'),
+      municipio: g('c-dec-mun'), estado: g('c-dec-est'), telefono: g('c-dec-tel') },
+    testigo1:{ nombre: g('c-t1-nom'), parentesco: g('c-t1-par'),
+      estadoCivil: g('c-t1-ec'), localidad: g('c-t1-local'),
+      municipio: g('c-t1-mun'), estado: g('c-t1-est'), telefono: g('c-t1-tel') },
+    testigo2:{ nombre: g('c-t2-nom'), parentesco: g('c-t2-par'),
+      estadoCivil: g('c-t2-ec'), localidad: g('c-t2-local'),
+      municipio: g('c-t2-mun'), estado: g('c-t2-est'), telefono: g('c-t2-tel') },
+    notasInternas: g('c-notas'),
+    funerario: g('c-funerario'),
+  };
+}
+
+// ═══════════════════════════════════
+//  ARCHIVAR
+// ═══════════════════════════════════
+function archivar(){
+  const folio = document.getElementById('c-folio')?.value?.trim();
+  const nombre = document.getElementById('c-nombre')?.value?.trim();
+  if(!folio){ toast('Ingresa el No. de Folio','err'); return; }
+  if(!nombre){ toast('Ingresa el nombre del finado','err'); return; }
+
+  const datos = recolectar();
+  let arch = obtenerArchivados();
+  const idx = arch.findIndex(r => r.id === datos.id);
+  if(idx >= 0) arch[idx] = datos; else arch.push(datos);
+  localStorage.setItem('capturador_archivados', JSON.stringify(arch));
+
+  toast('✅ Registro archivado correctamente');
+  document.getElementById('badge-estado').className = 'badge badge-archivado';
+  document.getElementById('badge-estado').textContent = 'Archivado';
+  hayEdiciones = false;
+  document.getElementById('diff-bar').classList.remove('show');
+}
+
+// ═══════════════════════════════════
+//  ARCHIVADOS
+// ═══════════════════════════════════
+function obtenerArchivados(){
+  try{ return JSON.parse(localStorage.getItem('capturador_archivados')||'[]'); }
+  catch(e){ return []; }
+}
+
+function renderArchivados(){
+  const lista = document.getElementById('lista-archivados');
+  const regs = obtenerArchivados().slice().reverse();
+  if(!regs.length){
+    lista.innerHTML = '<div class="vacio"><div class="vacio-i">📁</div>No hay registros archivados.<br>Importa un JSON y archiva el primer servicio.</div>';
+    return;
+  }
+  lista.innerHTML = regs.map(r=>`
+    <div class="reg-card">
+      <div class="rc-top">
+        <div>
+          <div class="rc-folio">Folio: ${r.folio||'—'}</div>
+          <div class="rc-nombre">${r.finado?.nombre||'Sin nombre'}</div>
+          <div class="rc-fecha">Defunción: ${r.fallecimiento?.fecha||'—'} &nbsp;·&nbsp; Archivado: ${new Date(r.fechaArchivado||Date.now()).toLocaleDateString('es-MX')}</div>
+        </div>
+      </div>
+      <div class="rc-btns">
+        <button class="rc-btn prim" onclick="reabrirArchivado(${r.id})">✏️ Editar</button>
+        <button class="rc-btn" onclick="exportarArchivado(${r.id})">📤 Exportar JSON</button>
+        <button class="rc-btn danger" onclick="eliminarArchivado(${r.id})">🗑 Eliminar</button>
+      </div>
+    </div>`).join('');
+}
+
+function reabrirArchivado(id){
+  const r = obtenerArchivados().find(x=>x.id===id);
+  if(!r) return;
+  datosCargados = r;
+  llenarFormulario(r);
+  irTab('editar', document.querySelectorAll('.tab')[0]);
+  toast('Registro cargado para editar');
+}
+
+function exportarArchivado(id){
+  const r = obtenerArchivados().find(x=>x.id===id);
+  if(!r) return;
+  const blob = new Blob([JSON.stringify(r,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url;
+  a.download=`archivado-${r.folio||r.id}.json`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function eliminarArchivado(id){
+  if(!confirm('¿Eliminar este registro archivado? No se puede deshacer.')) return;
+  let arch = obtenerArchivados().filter(r=>r.id!==id);
+  localStorage.setItem('capturador_archivados', JSON.stringify(arch));
+  renderArchivados();
+  toast('Registro eliminado');
+}
+
+function exportarJSONEditado(){
+  const datos = recolectar();
+  const blob = new Blob([JSON.stringify(datos,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url;
+  a.download=`editado-${datos.folio||datos.id}.json`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════
+//  LIMPIAR
+// ═══════════════════════════════════
+function limpiarTodo(){
+  if(hayEdiciones && !confirm('¿Descartar los cambios sin archivar?')) return;
+  datosCargados = null; hayEdiciones = false;
+  document.querySelectorAll('input,select,textarea').forEach(el=>{ if(el.type!=='button') el.value=''; });
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  document.querySelectorAll('.editado').forEach(c=>c.classList.remove('editado'));
+  ['encabezado','finado','padres','fall','dec','t1','t2','notas'].forEach(b=>{
+    const el=document.getElementById('bloque-'+b); if(el) el.style.display='none';
+  });
+  document.getElementById('zona').style.display='block';
+  document.getElementById('btn-archivar').style.display='none';
+  document.getElementById('btn-exportar-edit').style.display='none';
+  document.getElementById('diff-bar').classList.remove('show');
+  window.scrollTo(0,0);
+}
+
+// ═══════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════
+function toast(msg, tipo='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show'+(tipo==='err'?' err':'');
+  setTimeout(()=>t.className='toast',2800);
+}
+</script>
+</body>
+</html>
