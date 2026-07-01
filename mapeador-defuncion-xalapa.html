@@ -185,7 +185,9 @@ body{background:#4a4a4a;font-family:Arial,sans-serif;}
   <div class="toolbar-btns">
     <span class="folio-info" id="folio-actual">Sin registro cargado</span>
     <button class="btn btn-gris" onclick="abrirSelector()">📂 Cargar registro</button>
+    <button class="btn btn-gris" onclick="exportarJSON()" id="btn-exportar" style="display:none">📤 Exportar JSON</button>
     <button class="btn btn-dorado" onclick="window.print()">🖨️ Imprimir</button>
+    <button class="btn" style="background:#3ba776;color:#fff;" onclick="irCapturador()">📝 Abrir Capturador</button>
     <button class="btn btn-gris" id="btn-editar" onclick="abrirPin()">🔒 Editar</button>
   </div>
 </div>
@@ -1019,6 +1021,9 @@ window.addEventListener('DOMContentLoaded', ()=>{
     llenarFormato(registroElegido);
   }
 });
+function irCapturador(){
+  window.location.href = 'formato-certificar.html?tab=registro';
+}
 </script>
 </body>
 </html>
